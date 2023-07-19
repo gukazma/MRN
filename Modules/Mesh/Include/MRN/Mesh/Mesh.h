@@ -13,7 +13,8 @@ public:
         GLTF,
     };
     explicit Mesh(const boost::filesystem::path& path_, DataType type = OSGB);
-    
+    void write(const boost::filesystem::path& path_);
+
 private:
     std::shared_ptr<MeshImplBase> m_meshImplement;
 };

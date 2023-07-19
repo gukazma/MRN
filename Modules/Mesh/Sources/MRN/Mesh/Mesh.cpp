@@ -12,5 +12,8 @@ namespace MRN
         }
         m_meshImplement->read(path_);
 	}
-
+    void Mesh::write(const boost::filesystem::path& path_)
+    {
+        m_meshImplement->write(path_);
+    }
 }

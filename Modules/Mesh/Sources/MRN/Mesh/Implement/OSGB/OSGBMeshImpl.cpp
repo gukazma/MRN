@@ -1,7 +1,9 @@
 #include <MRN/Mesh/Implement/OSGB/OSGBMeshImpl.h>
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 #include <osg/NodeVisitor>
 #include <vector>
+#include <fstream>
 namespace MRN
 {
 class OSGBMeshVisitor : public osg::NodeVisitor
@@ -9,9 +11,10 @@ class OSGBMeshVisitor : public osg::NodeVisitor
 public:
     OSGBMeshVisitor(SurfaceMesh& mesh)
         : m_NativeMeshPreference(mesh)
+        , osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
     {}
 
-    void apply(osg::Geode& geode)
+    void apply(osg::Geode& geode) override
     {
         for (size_t i = 0; i < geode.getNumChildren(); i++) {
             osg::Geometry* geom = geode.getDrawable(i)->asGeometry();
@@ -25,28 +28,24 @@ public:
             if (!vertices) continue;
 
             std::vector<uint32_t> faces;
-            if (!faces_uint) {
+            if (faces_uint) {
+                faces.clear();
                 for (size_t i = 0; i < faces_uint->size(); i++) {
-                    faces.clear();
                     faces.push_back(faces_uint->getElement(i));
                 }
             }
-            if (!faces_ushort) {
+            if (faces_ushort) {
+                faces.clear();
                 for (size_t i = 0; i < faces_ushort->size(); i++) {
-                    faces.clear();
                     faces.push_back(faces_ushort->getElement(i));
                 }
             }
 
-            VertexPointMap vpmap =
-                m_NativeMeshPreference
-                    .property_map<VertexIndex, Point3>(
-                "v:points").first;
 
             for (size_t i = 0; i < vertices->size(); i++) {
                 auto v = vertices->at(i);
-                VertexIndex vertex_index = m_NativeMeshPreference.add_vertex();
-                vpmap[vertex_index]                    = Point3(v.x(), v.y(), v.z());
+                Point3      p = Point3(v.x(), v.y(), v.z());
+                VertexIndex vertex_index = m_NativeMeshPreference.add_vertex(p);
             }
             for (size_t i = 0; i < faces.size(); i+=3) {
                 FaceIndex face_index = m_NativeMeshPreference.add_face(
@@ -61,7 +60,6 @@ private:
 
 void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_) {
     auto            node = osgDB::readNodeFile(path_.generic_string().c_str());
-    if (node == nullptr) std::cout << "nullptr" << std::endl;
     OSGBMeshVisitor meshVisitor(m_nativeMesh);
     node->accept(meshVisitor);
 }
