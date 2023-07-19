@@ -18,18 +18,20 @@ target_compile_options(${TARGET_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:
 
 # Link dependencies    
 target_link_libraries(${TARGET_NAME} 
-    PUBLIC
-    Boost::system
-    Boost::filesystem
-    Boost::dynamic_linking
-    Boost::thread
-    CGAL::CGAL
-          )
+PUBLIC
+Boost::system
+Boost::filesystem
+Boost::dynamic_linking
+Boost::thread
+CGAL::CGAL
+${OPENSCENEGRAPH_LIBRARIES}
+)
 
 target_include_directories(
-  ${TARGET_NAME} 
-  PUBLIC 
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>
+${TARGET_NAME} 
+PUBLIC 
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>
+${OPENSCENEGRAPH_INCLUDE_DIRS}
 )
 
 packageProject(

@@ -26,6 +26,7 @@ target_link_libraries(${TARGET_NAME}
       PRIVATE
             ${PROJECT_NAME}::Primitives
             gtest_main
+            ${PROJECT_NAME}::Mesh
 )
 
 target_include_directories(

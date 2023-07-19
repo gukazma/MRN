@@ -32,7 +32,8 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
 endif()
 
 find_package(Boost COMPONENTS filesystem system thread REQUIRED)
-FIND_PACKAGE(CGAL REQUIRED HINTS "D:/ThirdParty/CGAL-5.5.2")
+find_package(CGAL REQUIRED HINTS "D:/ThirdParty/CGAL-5.5.2")
+find_package(OpenSceneGraph 2.0.0 REQUIRED osgViewer osgDB osgUtil osgQt5 osgGA)
 
 add_subdirectory(Modules)
 add_subdirectory(Apps)

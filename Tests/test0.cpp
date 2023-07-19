@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
-TEST(MYTEST0, A)
+#include <MRN/Mesh/Mesh.h>
+TEST(MRN, OSGBRead)
 {
+    MRN::Mesh mesh("D:/data/合并根节点/test/Tile_+000_+014/Tile_+000_+014_15_0.osgb");
 }

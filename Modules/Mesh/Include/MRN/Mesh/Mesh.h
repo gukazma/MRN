@@ -7,9 +7,14 @@ class MeshImplBase;
 class Mesh
 {
 public:
-    explicit Mesh(const boost::filesystem::path& path_);
+    enum DataType
+    {
+        OSGB = 0,
+        GLTF,
+    };
+    explicit Mesh(const boost::filesystem::path& path_, DataType type = OSGB);
     
 private:
-    std::unique_ptr<MeshImplBase> m_meshImplement;
+    std::shared_ptr<MeshImplBase> m_meshImplement;
 };
 }
