@@ -2,6 +2,7 @@
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 #include <osg/NodeVisitor>
+#include <osg/Texture2D>
 #include <vector>
 #include <fstream>
 namespace MRN
@@ -10,7 +11,7 @@ class OSGBMeshVisitor : public osg::NodeVisitor
 {
 public:
     OSGBMeshVisitor(SurfaceMesh& mesh)
-        : m_NativeMeshPreference(mesh)
+        : m_nativeMeshPreference(mesh)
         , osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
     {}
 
@@ -19,9 +20,27 @@ public:
         for (size_t i = 0; i < geode.getNumChildren(); i++) {
             osg::Geometry* geom = geode.getDrawable(i)->asGeometry();
             if (geom == nullptr) continue;
-
+            VertexColorMap vcmap =
+                m_nativeMeshPreference.add_property_map<VertexIndex, Vec3>("v:color").first;
+            // get texture
+            osg::Texture2D* texture = dynamic_cast<osg::Texture2D*>(
+                geom->getStateSet()->getTextureAttribute(0, osg::StateAttribute::TEXTURE));
+            osg::Image* image = texture->getImage();
+            osg::Vec2Array* textureCoordArray =
+                dynamic_cast<osg::Vec2Array*>(geom->getTexCoordArray(0));
+            // get vertex
             osg::Vec3Array* vertices = dynamic_cast<osg::Vec3Array*>(geom->getVertexArray());
-            auto faces_uint = dynamic_cast<osg::DrawElementsUInt*>(geom->getPrimitiveSet(0));
+            for (size_t i = 0; i < vertices->size(); i++) {
+                auto v = vertices->at(i);
+                Point3      p = Point3(v.x(), v.y(), v.z());
+                VertexIndex vertex_index = m_nativeMeshPreference.add_vertex(p);
+                auto        coord        = textureCoordArray->at(i);
+                vcmap[vertex_index]      = {image->getColor(coord).r(),
+                                            image->getColor(coord).g(),
+                                            image->getColor(coord).b()};
+            }
+
+            auto faces_uint   = dynamic_cast<osg::DrawElementsUInt*>(geom->getPrimitiveSet(0));
             auto faces_ushort = dynamic_cast<osg::DrawElementsUShort*>(geom->getPrimitiveSet(0));
 
             if (!faces_uint && !faces_ushort) continue;
@@ -40,22 +59,15 @@ public:
                     faces.push_back(faces_ushort->getElement(i));
                 }
             }
-
-
-            for (size_t i = 0; i < vertices->size(); i++) {
-                auto v = vertices->at(i);
-                Point3      p = Point3(v.x(), v.y(), v.z());
-                VertexIndex vertex_index = m_NativeMeshPreference.add_vertex(p);
-            }
             for (size_t i = 0; i < faces.size(); i+=3) {
-                FaceIndex face_index = m_NativeMeshPreference.add_face(
+                FaceIndex face_index = m_nativeMeshPreference.add_face(
                     VertexIndex(faces[i]), VertexIndex(faces[i+1]), VertexIndex(faces[i+2]));
             }
         }
     }
 
 private:
-    SurfaceMesh& m_NativeMeshPreference;
+    SurfaceMesh& m_nativeMeshPreference;
 };
 
 void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_) {
