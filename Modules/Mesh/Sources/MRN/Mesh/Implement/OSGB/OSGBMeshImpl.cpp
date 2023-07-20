@@ -3,6 +3,7 @@
 #include <osgDB/WriteFile>
 #include <osg/NodeVisitor>
 #include <osg/Texture2D>
+#include <CGAL/IO/Color.h>
 #include <vector>
 #include <fstream>
 namespace MRN
@@ -21,7 +22,7 @@ public:
             osg::Geometry* geom = geode.getDrawable(i)->asGeometry();
             if (geom == nullptr) continue;
             VertexColorMap vcmap =
-                m_nativeMeshPreference.add_property_map<VertexIndex, Vec3>("v:color").first;
+                m_nativeMeshPreference.add_property_map<VertexIndex, CGAL::IO::Color>("v:color").first;
             // get texture
             osg::Texture2D* texture = dynamic_cast<osg::Texture2D*>(
                 geom->getStateSet()->getTextureAttribute(0, osg::StateAttribute::TEXTURE));
@@ -35,9 +36,11 @@ public:
                 Point3      p = Point3(v.x(), v.y(), v.z());
                 VertexIndex vertex_index = m_nativeMeshPreference.add_vertex(p);
                 auto        coord        = textureCoordArray->at(i);
-                vcmap[vertex_index]      = {image->getColor(coord).r(),
-                                            image->getColor(coord).g(),
-                                            image->getColor(coord).b()};
+                std::cout << "color:" << image->getColor(coord).r() << image->getColor(coord).g()
+                          << image->getColor(coord).b() << std::endl;
+                vcmap[vertex_index]      =  CGAL::IO::Color(image->getColor(coord).r()*255,
+                                                      image->getColor(coord).g() * 255,
+                                                      image->getColor(coord).b() * 255);
             }
 
             auto faces_uint   = dynamic_cast<osg::DrawElementsUInt*>(geom->getPrimitiveSet(0));

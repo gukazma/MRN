@@ -5,7 +5,11 @@ namespace MRN
 {
 void MeshImplBase::write(const boost::filesystem::path& path_) {
     std::ofstream f(path_.generic_string());
-    if (path_.extension() == ".ply") CGAL::IO::write_PLY(f, m_nativeMesh);
+    VertexColorMap vpmap;
+    bool           created;
+    boost::tie(vpmap, created) = m_nativeMesh.property_map<VertexIndex, CGAL::IO::Color>("v:color");
+    if (path_.extension() == ".ply")
+        CGAL::IO::write_PLY(f, m_nativeMesh, CGAL::parameters::vertex_color_map(vpmap));
     if (path_.extension() == ".off") CGAL::IO::write_OFF(f, m_nativeMesh);
     if (path_.extension() == ".obj") CGAL::IO::write_OBJ(f, m_nativeMesh);
     if (path_.extension() == ".obj") CGAL::IO::write_OBJ(f, m_nativeMesh);

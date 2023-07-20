@@ -1,6 +1,7 @@
 #pragma once
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Surface_mesh.h>
+#include <CGAL/IO/Color.h>
 namespace MRN
 {
 	using Kernel         = CGAL::Simple_cartesian<float>;
@@ -10,5 +11,5 @@ namespace MRN
 	using VertexIndex    = SurfaceMesh::Vertex_index;
 	using FaceIndex      = SurfaceMesh::Face_index;
 	using VertexPointMap = SurfaceMesh::Property_map<VertexIndex, Point3>;
-	using VertexColorMap = SurfaceMesh::Property_map<VertexIndex, Vec3>;
+	using VertexColorMap = SurfaceMesh::Property_map<VertexIndex, CGAL::IO::Color>;
 }
