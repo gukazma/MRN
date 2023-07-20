@@ -9,6 +9,7 @@ public:
     MeshImplBase() = default;
     virtual void read(const boost::filesystem::path& path_) = 0;
     virtual void write(const boost::filesystem::path& path_);
+    SurfaceMesh& getNativeMesh();
 
 protected:
     SurfaceMesh m_nativeMesh;

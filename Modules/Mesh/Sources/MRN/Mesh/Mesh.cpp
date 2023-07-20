@@ -16,4 +16,11 @@ namespace MRN
     {
         m_meshImplement->write(path_);
     }
-}
+    void Mesh::join(Mesh& other) {
+        
+    }
+    SurfaceMesh& Mesh::getNativMesh()
+    {
+        return m_meshImplement->getNativeMesh();
+    }
+    }
