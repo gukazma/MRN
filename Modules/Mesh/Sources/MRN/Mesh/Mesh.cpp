@@ -6,21 +6,25 @@ namespace MRN
         switch (type) {
         case MRN::Mesh::OSGB: 
              m_meshImplement = std::make_shared<OSGBMeshImpleMesh>();
-            break;
+             break;
         case MRN::Mesh::GLTF: break;
         default: break;
         }
         m_meshImplement->read(path_);
 	}
+
     void Mesh::write(const boost::filesystem::path& path_)
     {
         m_meshImplement->write(path_);
     }
+
     void Mesh::join(Mesh& other) {
-        
+        m_meshImplement->join(*other.m_meshImplement);
     }
+
     SurfaceMesh& Mesh::getNativMesh()
     {
         return m_meshImplement->getNativeMesh();
     }
-    }
+
+}
