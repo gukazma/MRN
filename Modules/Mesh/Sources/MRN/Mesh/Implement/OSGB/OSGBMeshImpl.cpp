@@ -110,4 +110,42 @@ void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_) {
     OSGBMeshVisitor meshVisitor(m_nativeMesh);
     node->accept(meshVisitor);
 }
+void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
+    if (path_.extension() == ".osgb" || path_.extension() == ".osgt") {
+        osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+        osg::ref_ptr<osg::Vec4Array> colors   = new osg::Vec4Array();
+        auto vcmap = m_nativeMesh.property_map<VertexIndex, CGAL::IO::Color>("v:color").first;
+        auto vpmap = m_nativeMesh.points();
+        for (auto v : m_nativeMesh.vertices()) {
+            auto p = vpmap[v];
+            auto c = vcmap[v];
+            vertices->push_back(osg::Vec3(p.x(), p.y(), p.z()));
+            colors->push_back(
+                osg::Vec4(c.r() / 255.0, c.g() / 255.0, c.b() / 255.0, c.a() / 255.0));
+        }
+        
+        osg::ref_ptr<osg::DrawElementsUInt> indices =
+            new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES);
+
+        for (auto f : m_nativeMesh.faces()) {
+            auto hf0 = m_nativeMesh.halfedge(f);
+            auto hf1 = m_nativeMesh.next(hf0);
+            auto hf2 = m_nativeMesh.next(hf1);
+            if (m_nativeMesh.next(hf2) != hf0) continue;
+            indices->push_back(m_nativeMesh.target(hf0).idx());
+            indices->push_back(m_nativeMesh.target(hf1).idx());
+            indices->push_back(m_nativeMesh.target(hf2).idx());
+        }
+        
+        osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
+        geometry->setColorArray(colors.get());
+        geometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+        geometry->setVertexArray(vertices);
+        geometry->addPrimitiveSet(indices);
+        osgDB::writeNodeFile(*geometry, path_.generic_string());
+    }
+    else {
+        MeshImplBase::write(path_);
+    }
+}
 }
