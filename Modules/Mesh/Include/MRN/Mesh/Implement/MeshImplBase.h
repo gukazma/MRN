@@ -10,6 +10,7 @@ public:
     virtual void read(const boost::filesystem::path& path_) = 0;
     virtual void write(const boost::filesystem::path& path_);
     SurfaceMesh& getNativeMesh();
+    void join(MeshImplBase& other);
 
 protected:
     SurfaceMesh m_nativeMesh;
