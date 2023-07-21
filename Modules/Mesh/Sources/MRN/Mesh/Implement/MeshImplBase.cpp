@@ -10,9 +10,9 @@ namespace MRN
 void MeshImplBase::write(const boost::filesystem::path& path_) {
     std::ofstream f(path_.generic_string());
     VertexColorMap vpmap;
-    double         stop_ratio =  0.1;
-    SMS::Count_ratio_stop_predicate<SurfaceMesh> stop(stop_ratio);
-    int                                           r = SMS::edge_collapse(m_nativeMesh, stop);
+    //double         stop_ratio =  0.1;
+    //SMS::Count_ratio_stop_predicate<SurfaceMesh> stop(stop_ratio);
+    //int                                           r = SMS::edge_collapse(m_nativeMesh, stop);
 
     bool created;
     boost::tie(vpmap, created) = m_nativeMesh.property_map<VertexIndex, CGAL::IO::Color>("v:color");
