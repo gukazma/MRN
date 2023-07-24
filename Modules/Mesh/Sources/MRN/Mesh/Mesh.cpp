@@ -19,7 +19,7 @@ namespace MRN
     }
 
     void Mesh::join(Mesh& other) {
-        m_meshImplement->join(*other.m_meshImplement);
+        m_meshImplement->join(*(other.m_meshImplement));
     }
 
     SurfaceMesh& Mesh::getNativMesh()
