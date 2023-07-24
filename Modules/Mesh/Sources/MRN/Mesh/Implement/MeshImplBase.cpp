@@ -3,6 +3,7 @@
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_ratio_stop_predicate.h>
 #include <CGAL/Polygon_mesh_processing/repair.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_hole.h>
 #include <CGAL/Advancing_front_surface_reconstruction.h>
 #include <CGAL/Point_set_3.h>
 #include <fstream>
@@ -179,16 +180,6 @@ void MeshImplBase::join(MeshImplBase& other) {
 
         m_nativeMesh.add_face(v1, v2, v3);
     }
-
-    //std::vector<Facet> borderFacets;
-    //std::vector<Point3> borderVertices;
-    //CGAL::advancing_front_surface_reconstruction(borderPoints.points().begin(),
-    //                                             borderPoints.points().end(),
-    //                                             std::back_inserter(borderFacets));
-    //borderVertices.reserve(borderPoints.size());
-    //std::copy(borderPoints.points().begin(),
-    //          borderPoints.points().end(),
-    //          std::back_inserter(borderVertices));
 
 }
 }
