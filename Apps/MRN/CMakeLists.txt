@@ -1,7 +1,18 @@
-set(TARGET_NAME DemoApp)
+set(TARGET_NAME MRN)
 
 # for qt
-# set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR})
+# just for qt
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
+
+find_package(Qt5 COMPONENTS
+        Core
+        Gui
+        Widgets
+        OpenGL
+        REQUIRED)
 
 file(GLOB_RECURSE CPP_HEAD_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB_RECURSE CPP_SOUCE_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
@@ -10,12 +21,18 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${CPP_HEAD_FILES} ${CPP_SO
 
 add_executable(${TARGET_NAME} ${CPP_HEAD_FILES} ${CPP_SOUCE_FILES})
 
-set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME ${PROJECT_NAME})
+set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME ${TARGET_NAME})
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER Apps)
 
 target_compile_options(${TARGET_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/WX->")
 
-target_link_libraries(${TARGET_NAME} PRIVATE ${PROJECT_NAME}::Primitives)
+target_link_libraries(${TARGET_NAME} PRIVATE 
+${PROJECT_NAME}::Primitives
+Qt5::Core
+Qt5::Gui
+Qt5::Widgets
+Qt5::OpenGL
+)
 
 target_include_directories(
   ${TARGET_NAME} 
