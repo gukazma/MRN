@@ -16,6 +16,7 @@ public:
     explicit Mesh(const boost::filesystem::path& path_, DataType type = OSGB);
     void write(const boost::filesystem::path& path_);
     void         join(Mesh& other);
+    void         simplify();
     SurfaceMesh& getNativMesh();
     void         removeSmallComponents(size_t threshold);
 

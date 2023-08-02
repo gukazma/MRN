@@ -35,6 +35,7 @@ find_package(Boost COMPONENTS filesystem system thread REQUIRED)
 find_package(CGAL REQUIRED HINTS "D:/ThirdParty/CGAL-5.5.2")
 find_package(OpenSceneGraph 2.0.0 REQUIRED osgViewer osgDB osgUtil osgQt5 osgGA)
 find_package(googletest HINTS "D:/ThirdParty/googletest")
+find_package (Eigen3 REQUIRED HINTS "D:/ThirdParty/Eigen3")
 
 add_subdirectory(Modules)
 add_subdirectory(Apps)

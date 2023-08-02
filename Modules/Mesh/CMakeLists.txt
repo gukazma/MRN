@@ -16,6 +16,11 @@ set_target_properties(${TARGET_NAME} PROPERTIES FOLDER Modules)
 target_compile_options(${TARGET_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 target_compile_options(${TARGET_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/WX->")
 
+target_compile_definitions(${TARGET_NAME}
+PUBLIC
+"CGAL_EIGEN3_ENABLED"
+)
+
 # Link dependencies    
 target_link_libraries(${TARGET_NAME} 
 PUBLIC
@@ -24,6 +29,7 @@ Boost::filesystem
 Boost::dynamic_linking
 Boost::thread
 CGAL::CGAL
+Eigen3::Eigen
 ${OPENSCENEGRAPH_LIBRARIES}
 )
 

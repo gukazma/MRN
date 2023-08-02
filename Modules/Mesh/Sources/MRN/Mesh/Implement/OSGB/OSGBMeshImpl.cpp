@@ -127,11 +127,13 @@ void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
         osg::ref_ptr<osg::DrawElementsUInt> indices =
             new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES);
 
+        auto daw = m_nativeMesh.faces();
         for (auto f : m_nativeMesh.faces()) {
             auto hf0 = m_nativeMesh.halfedge(f);
             auto hf1 = m_nativeMesh.next(hf0);
             auto hf2 = m_nativeMesh.next(hf1);
-            if (m_nativeMesh.next(hf2) != hf0) continue;
+            if (m_nativeMesh.next(hf2) != hf0) 
+                continue;
             indices->push_back(m_nativeMesh.target(hf0).idx());
             indices->push_back(m_nativeMesh.target(hf1).idx());
             indices->push_back(m_nativeMesh.target(hf2).idx());

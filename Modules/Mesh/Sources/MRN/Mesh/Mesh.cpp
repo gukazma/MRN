@@ -22,6 +22,11 @@ namespace MRN
         m_meshImplement->join(*(other.m_meshImplement));
     }
 
+    void Mesh::simplify()
+    {
+        m_meshImplement->simplify();
+    }
+
     void Mesh::removeSmallComponents(size_t threshold)
     {
         m_meshImplement->removeSmallComponents(threshold);

@@ -11,6 +11,7 @@ public:
     virtual void write(const boost::filesystem::path& path_);
     SurfaceMesh& getNativeMesh();
     void         join(MeshImplBase& other);
+    void         simplify();
     void removeSmallComponents(size_t threshold);
 
 protected:
