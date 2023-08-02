@@ -9,8 +9,8 @@ TEST(MRN, JOIN)
     boost::filesystem::path MRNDataPath = env["MRNDATA"].to_string();
     MRN::Mesh               mesh14(MRNDataPath / "osgb/Tile_+000_+014/Tile_+000_+014_15_0.osgb");
     MRN::Mesh               mesh15(MRNDataPath / "osgb/Tile_+000_+015/Tile_+000_+015_15_0.osgb");
-    //mesh14.write(MRNDataPath / "output/tile14.ply");
-    //mesh15.write(MRNDataPath / "output/tile15.ply");
+
     mesh14.join(mesh15);
-    mesh14.write(MRNDataPath / "output/tile14+15.ply");
+    mesh14.removeSmallComponents(50);
+    mesh14.write(MRNDataPath / "output/tile14+15_replace+removeSmall+simplify_test.osgb");
 }

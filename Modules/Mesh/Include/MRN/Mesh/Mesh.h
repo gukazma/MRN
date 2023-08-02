@@ -17,6 +17,7 @@ public:
     void write(const boost::filesystem::path& path_);
     void         join(Mesh& other);
     SurfaceMesh& getNativMesh();
+    void         removeSmallComponents(size_t threshold);
 
 private:
     std::shared_ptr<MeshImplBase> m_meshImplement;

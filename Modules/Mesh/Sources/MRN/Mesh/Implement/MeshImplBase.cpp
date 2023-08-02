@@ -2,10 +2,10 @@
 #include <CGAL/Surface_mesh/IO.h>
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_ratio_stop_predicate.h>
-#include <CGAL/Polygon_mesh_processing/repair.h>
-#include <CGAL/Polygon_mesh_processing/triangulate_hole.h>
-#include <CGAL/Advancing_front_surface_reconstruction.h>
-#include <CGAL/Point_set_3.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_filter.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/LindstromTurk_cost.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/LindstromTurk_placement.h>
+#include <CGAL/polygon_mesh_processing.h>
 #include <fstream>
 namespace SMS = CGAL::Surface_mesh_simplification;
 namespace MRN
@@ -13,9 +13,17 @@ namespace MRN
 void MeshImplBase::write(const boost::filesystem::path& path_) {
     std::ofstream f(path_.generic_string());
     VertexColorMap vpmap;
-    /*double         stop_ratio =  0.1;
+    // simplify
+    double         stop_ratio =  0.1;
     SMS::Count_ratio_stop_predicate<SurfaceMesh> stop(stop_ratio);
-    int                                           r = SMS::edge_collapse(m_nativeMesh, stop);*/
+    SMS::Bounded_normal_change_filter<>          filter;
+    typedef SMS::LindstromTurk_placement<SurfaceMesh> Placement;
+    SMS::internal::LindstromTurk_params               lp(0.5, 0.3, 0.5);
+    SMS::edge_collapse(m_nativeMesh,
+                       stop,
+                       CGAL::parameters::get_cost(SMS::LindstromTurk_cost<SurfaceMesh>(lp))
+                           .filter(filter)
+                           .get_placement(Placement()));
 
     bool created;
     boost::tie(vpmap, created) = m_nativeMesh.property_map<VertexIndex, CGAL::IO::Color>("v:color");
@@ -33,7 +41,6 @@ SurfaceMesh& MeshImplBase::getNativeMesh()
 void MeshImplBase::join(MeshImplBase& other) {
     VertexColorMap vcmap =
         m_nativeMesh.add_property_map<VertexIndex, CGAL::IO::Color>("v:color").first;
-    CGAL::Point_set_3<Point3> borderPoints;
     std::vector<VertexIndex> borderVertices, borderVertices_other;
     std::map<VertexIndex, VertexIndex> replaceVVMap;
 
@@ -48,44 +55,40 @@ void MeshImplBase::join(MeshImplBase& other) {
         xyflag = 0;
     }   // right
     if (abs(bbox_other.xmax() - bbox.xmin()) <= minbox) {
-        minbox = abs(bbox_other.xmin() - bbox.xmax());
-        xyflag = 0;
+        minbox = abs(bbox_other.xmax() - bbox.xmin());
+        xyflag = 1;
     }   // left
     if (abs(bbox_other.ymax() - bbox.ymin()) <= minbox) {
-        minbox = abs(bbox_other.xmin() - bbox.xmax());
-        xyflag = 0;
+        minbox = abs(bbox_other.ymax() - bbox.ymin());
+        xyflag = 2;
     }   // down
     if (abs(bbox_other.ymin() - bbox.ymax()) <= minbox) {
-        minbox = abs(bbox_other.xmin() - bbox.xmax());
-        xyflag = 0;
+        minbox = abs(bbox_other.ymin() - bbox.ymax());
+        xyflag = 3;
     }   // up
 
-    float threshold = 10.0f;
+    float threshold = 0.5f;
     for (auto& v : m_nativeMesh.vertices()) {
         auto p = m_nativeMesh.point(v);
-        if (bbox_other.bounded_side(p) == CGAL::ON_BOUNDED_SIDE) {
+        if (m_nativeMesh.is_border(v)) {
             switch (xyflag) {
             case 0:
                 if (bbox_other.xmin() - p.x() < threshold) {
-                    borderPoints.insert(p);
                     borderVertices.push_back(v);
                 }
                 break;
             case 1:
                 if (p.x() - bbox_other.xmax() < threshold) {
-                    borderPoints.insert(p);
                     borderVertices.push_back(v);
                 }
                 break;
             case 2:
                 if (p.y() - bbox_other.ymax() < threshold) {
-                    borderPoints.insert(p);
                     borderVertices.push_back(v);
                 }
                 break;
             case 3:
                 if (bbox_other.ymin() - p.y() < threshold) {
-                    borderPoints.insert(p);
                     borderVertices.push_back(v);
                 }
                 break;
@@ -95,33 +98,29 @@ void MeshImplBase::join(MeshImplBase& other) {
     }
     for (auto& v : other.m_nativeMesh.vertices()) {
         auto p = other.m_nativeMesh.point(v);
-        if (bbox.bounded_side(p) == CGAL::ON_BOUNDED_SIDE) {
+        if (other.m_nativeMesh.is_border(v)) {
             Point3 p1;
             switch (xyflag) {
             case 0:
                 if (p.x() - bbox.xmax() < threshold) {
-                    borderPoints.insert(p);
                     borderVertices_other.push_back(v);
                     p1 = p;
                 }
                 break;
             case 1:
                 if (bbox.xmin() - p.x() < threshold) {
-                    borderPoints.insert(p);
                     borderVertices_other.push_back(v);
                     p1 = p;
                 }
                 break;
             case 2:
                 if (bbox.ymin() - p.y() < threshold) {
-                    borderPoints.insert(p);
                     borderVertices_other.push_back(v);
                     p1 = p;
                 }
                 break;
             case 3:
                 if (p.y() - bbox.ymax() < threshold) {
-                    borderPoints.insert(p);
                     borderVertices_other.push_back(v);
                     p1 = p;
                 }
@@ -181,5 +180,57 @@ void MeshImplBase::join(MeshImplBase& other) {
         m_nativeMesh.add_face(v1, v2, v3);
     }
 
+    CGAL::Polygon_mesh_processing::duplicate_non_manifold_vertices(m_nativeMesh);
+    CGAL::Polygon_mesh_processing::stitch_borders(m_nativeMesh);
 }
+
+void MeshImplBase::removeSmallComponents(size_t threshold)
+{
+    std::vector<bool> visited(m_nativeMesh.num_vertices(), false);
+    std::vector<VertexIndex> needRemoveVertices;
+    int                      nRemovedComponents = 0;
+    for (auto& v : m_nativeMesh.vertices()) {
+        if (visited[v]) continue;
+
+        std::queue<VertexIndex> queue;
+        queue.push(v);
+        visited[v] = true;
+        std::size_t numVertex = 0;
+        std::vector<VertexIndex> vertices;
+        while (!queue.empty()) {
+            VertexIndex vertexID = queue.front();
+            queue.pop();
+            numVertex++;
+            vertices.push_back(vertexID);
+            for (auto hv : m_nativeMesh.vertices_around_target(m_nativeMesh.halfedge(vertexID))) {
+                if (visited[hv] == false) {
+                    queue.push(hv);
+                    visited[hv] = true;
+                }
+            }
+        }
+
+        if (numVertex < threshold) {
+            needRemoveVertices.insert(needRemoveVertices.end(), vertices.begin(), vertices.end());
+            nRemovedComponents++;
+        }
+    }
+
+    std::set<FaceIndex> needRemoveFaces;
+    for (auto& vertex : needRemoveVertices) {
+        for (auto face : m_nativeMesh.faces_around_target(m_nativeMesh.halfedge(vertex))) {
+            if (face != m_nativeMesh.null_face()) {
+                needRemoveFaces.insert(face);
+            }
+        }
+    }
+    for (auto& face : needRemoveFaces) {
+        CGAL::Euler::remove_face(m_nativeMesh.halfedge(face), m_nativeMesh);
+        //m_nativeMesh.remove_face(face); 
+    }
+
+    m_nativeMesh.collect_garbage();
+    std::cout << "remove " << nRemovedComponents << "small components" << std::endl;
+}
+
 }
