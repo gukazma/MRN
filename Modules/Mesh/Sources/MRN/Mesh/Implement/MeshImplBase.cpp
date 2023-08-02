@@ -11,6 +11,9 @@
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Constrained_placement.h>
 #include <CGAL/polygon_mesh_processing.h>
 #include <fstream>
+#include <boost/thread.hpp>
+#include <boost/range/algorithm.hpp>
+
 namespace SMS = CGAL::Surface_mesh_simplification;
 namespace MRN
 {

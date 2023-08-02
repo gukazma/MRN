@@ -114,14 +114,12 @@ void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
     if (path_.extension() == ".osgb" || path_.extension() == ".osgt") {
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
         osg::ref_ptr<osg::Vec4Array> colors   = new osg::Vec4Array();
+        std::map<VertexIndex, bool>  vindexBMap;
+        std::map<VertexIndex, size_t>  vindexIMap;
         auto vcmap = m_nativeMesh.property_map<VertexIndex, CGAL::IO::Color>("v:color").first;
         auto vpmap = m_nativeMesh.points();
         for (auto v : m_nativeMesh.vertices()) {
-            auto p = vpmap[v];
-            auto c = vcmap[v];
-            vertices->push_back(osg::Vec3(p.x(), p.y(), p.z()));
-            colors->push_back(
-                osg::Vec4(c.r() / 255.0, c.g() / 255.0, c.b() / 255.0, c.a() / 255.0));
+            vindexBMap[v] = false;
         }
         
         osg::ref_ptr<osg::DrawElementsUInt> indices =
@@ -132,11 +130,44 @@ void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
             auto hf0 = m_nativeMesh.halfedge(f);
             auto hf1 = m_nativeMesh.next(hf0);
             auto hf2 = m_nativeMesh.next(hf1);
-            if (m_nativeMesh.next(hf2) != hf0) 
-                continue;
-            indices->push_back(m_nativeMesh.target(hf0).idx());
-            indices->push_back(m_nativeMesh.target(hf1).idx());
-            indices->push_back(m_nativeMesh.target(hf2).idx());
+            // 判断是否是三角形
+            if (m_nativeMesh.next(hf2) != hf0) continue;
+
+            auto v0 = m_nativeMesh.target(hf0);
+            auto v1 = m_nativeMesh.target(hf1);
+            auto v2 = m_nativeMesh.target(hf2);
+            if (!vindexBMap[v0]) {
+                auto p = vpmap[v0];
+                auto c = vcmap[v0];
+                vertices->push_back(osg::Vec3(p.x(), p.y(), p.z()));
+                colors->push_back(
+                    osg::Vec4(c.r() / 255.0, c.g() / 255.0, c.b() / 255.0, c.a() / 255.0));
+                vindexBMap[v0] = true;
+                vindexIMap[v0] = vertices->size() - 1;
+            }
+            if (!vindexBMap[v1]) {
+                auto p = vpmap[v1];
+                auto c = vcmap[v1];
+                vertices->push_back(osg::Vec3(p.x(), p.y(), p.z()));
+                colors->push_back(
+                    osg::Vec4(c.r() / 255.0, c.g() / 255.0, c.b() / 255.0, c.a() / 255.0));
+                vindexBMap[v1] = true;
+                vindexIMap[v1] = vertices->size() - 1;
+            }
+            if (!vindexBMap[v2]) {
+                auto p = vpmap[v2];
+                auto c = vcmap[v2];
+                vertices->push_back(osg::Vec3(p.x(), p.y(), p.z()));
+                colors->push_back(
+                    osg::Vec4(c.r() / 255.0, c.g() / 255.0, c.b() / 255.0, c.a() / 255.0));
+                vindexBMap[v2] = true;
+                vindexIMap[v2] = vertices->size() - 1;
+            }
+            
+
+            indices->push_back(vindexIMap[v0]);
+            indices->push_back(vindexIMap[v1]);
+            indices->push_back(vindexIMap[v2]);
         }
         
         osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
