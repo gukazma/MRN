@@ -1,14 +1,10 @@
 #include <MRN/Mesh/Implement/MeshImplBase.h>
 #include <CGAL/Surface_mesh/IO.h>
 #include <CGAL/Surface_mesh_simplification/edge_collapse.h>
-#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_ratio_stop_predicate.h>
+#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Count_stop_predicate.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Bounded_normal_change_filter.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/LindstromTurk_cost.h>
 #include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/LindstromTurk_placement.h>
-// Midpoint placement policy
-#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Midpoint_placement.h>
-//Placement wrapper
-#include <CGAL/Surface_mesh_simplification/Policies/Edge_collapse/Constrained_placement.h>
 #include <CGAL/polygon_mesh_processing.h>
 #include <fstream>
 #include <boost/thread.hpp>
@@ -17,73 +13,23 @@
 namespace SMS = CGAL::Surface_mesh_simplification;
 namespace MRN
 {
-//typedef boost::graph_traits<SurfaceMesh>::halfedge_descriptor halfedge_descriptor;
-//typedef boost::graph_traits<SurfaceMesh>::edge_descriptor edge_descriptor;
-//struct Border_is_constrained_edge_map
-//{
-//    const SurfaceMesh*                      sm_ptr;
-//    typedef edge_descriptor                  key_type;
-//    typedef bool                             value_type;
-//    typedef value_type                       reference;
-//    typedef boost::readable_property_map_tag category;
-//    Border_is_constrained_edge_map(const SurfaceMesh& sm)
-//        : sm_ptr(&sm)
-//    {}
-//    friend value_type get(const Border_is_constrained_edge_map& m, const key_type& edge)
-//    {
-//        return CGAL::is_border(edge, *m.sm_ptr);
-//    }
-//};
-
 void MeshImplBase::simplify() 
 {
-    double                                            stop_ratio = 0.1;
-    SMS::Count_ratio_stop_predicate<SurfaceMesh>      stop(stop_ratio);
+    // LindstromTurk
+    SMS::Count_stop_predicate<SurfaceMesh>            stop(0);
     SMS::Bounded_normal_change_filter<>               filter;
     SMS::internal::LindstromTurk_params               lp(0.5, 0.5, 0.5);
     typedef SMS::LindstromTurk_placement<SurfaceMesh> Placement;
     SMS::edge_collapse(m_nativeMesh,
                        stop,
-                       CGAL::parameters::get_cost(SMS::LindstromTurk_cost<SurfaceMesh>())
+                       CGAL::parameters::get_cost(SMS::LindstromTurk_cost<SurfaceMesh>(lp))
                            .filter(filter)
-                           .get_placement(Placement()));
+                           .get_placement(Placement(lp)));
 }
 void MeshImplBase::write(const boost::filesystem::path& path_)
 {
     std::ofstream f(path_.generic_string());
     VertexColorMap vpmap;
-    // simplify
-    //double stop_ratio =  0.1;
-    //SMS::Count_ratio_stop_predicate<SurfaceMesh> stop(stop_ratio);
-    //SMS::Bounded_normal_change_filter<>          filter;
-    //SMS::internal::LindstromTurk_params          lp(0.5, 0.5, 0.5);
-    //typedef SMS::LindstromTurk_placement<SurfaceMesh> Placement;
-    //SMS::edge_collapse(m_nativeMesh,
-    //                   stop,
-    //                   CGAL::parameters::get_cost(SMS::LindstromTurk_cost<SurfaceMesh>(lp))
-    //                       .filter(filter)
-    //                       .get_placement(Placement(lp)));
-    //typedef SMS::Constrained_placement<SMS::Midpoint_placement<SurfaceMesh>,
-    //                                   Border_is_constrained_edge_map> Placement;
-    //SurfaceMesh::Property_map<halfedge_descriptor, std::pair<Point3, Point3>>
-    //    constrained_halfedges;
-    //constrained_halfedges = m_nativeMesh.add_property_map<halfedge_descriptor, std::pair<Point3, Point3>>("h:vertices").first;
-    //std::size_t nb_border_edges = 0;
-    //for (halfedge_descriptor hd : halfedges(m_nativeMesh)) {
-    //    if (CGAL::is_border(hd, m_nativeMesh)) {
-    //        constrained_halfedges[hd] =
-    //            std::make_pair(m_nativeMesh.point(source(hd, m_nativeMesh)),
-    //                           m_nativeMesh.point(target(hd, m_nativeMesh)));
-    //        ++nb_border_edges;
-    //    }
-    //}
-    //// Contract the surface mesh as much as possible
-    //SMS::Count_ratio_stop_predicate<SurfaceMesh> stop(0);
-    //Border_is_constrained_edge_map               bem(m_nativeMesh);
-    //int r = SMS::edge_collapse(
-    //    m_nativeMesh,
-    //    stop,
-    //    CGAL::parameters::edge_is_constrained_map(bem).get_placement(Placement(bem)));
 
     bool created;
     boost::tie(vpmap, created) = m_nativeMesh.property_map<VertexIndex, CGAL::IO::Color>("v:color");
