@@ -24,6 +24,7 @@ Boost::filesystem
 Boost::dynamic_linking
 Boost::thread
 CGAL::CGAL
+Eigen3::Eigen
 ${OPENSCENEGRAPH_LIBRARIES}
 )
 
@@ -32,6 +33,7 @@ ${TARGET_NAME}
 PUBLIC 
 $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>
 ${OPENSCENEGRAPH_INCLUDE_DIRS}
+${VCG_INCLUDE_DIRS}
 )
 
 packageProject(
