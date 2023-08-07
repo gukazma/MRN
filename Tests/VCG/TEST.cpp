@@ -5,10 +5,12 @@
 #include <boost/process.hpp>
 // input output
 #include <wrap/io_trimesh/export_off.h>
+#include <vcg/complex/algorithms/update/color.h>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 #include <osg/NodeVisitor>
 #include <osg/Texture2D>
+#include <map>
 class MyFace;
 class MyVertex;
 
@@ -20,7 +22,7 @@ class MyVertex : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3f, vcg::vert
                                     vcg::vertex::Color4b, vcg::vertex::BitFlags>
 {};
 class MyFace : public vcg::Face<MyUsedTypes, vcg::face::VertexRef, vcg::face::Normal3f,
-                                vcg::face::FFAdj, vcg::face::BitFlags>
+                                vcg::face::Color4b, vcg::face::BitFlags>
 {};
 class MyMesh : public vcg::tri::TriMesh<std::vector<MyVertex>, std::vector<MyFace>>
 {};
@@ -37,6 +39,8 @@ public:
         for (size_t i = 0; i < geode.getNumChildren(); i++) {
             std::vector<vcg::Point3f> coordVec;
             std::vector<vcg::Point3i> indexVec;
+            std::map<vcg::Point3f, vcg::Color4b> pcmap;
+            std::vector<vcg::Color4b> colors;
             osg::Geometry* geom = geode.getDrawable(i)->asGeometry();
             if (geom == nullptr) continue;
             // get texture
@@ -49,15 +53,13 @@ public:
             osg::Vec3Array* vertices = dynamic_cast<osg::Vec3Array*>(geom->getVertexArray());
             for (size_t i = 0; i < vertices->size(); i++) {
                 auto v = vertices->at(i);
-                coordVec.push_back({v.x(), v.y(), v.z()});
-                /*Point3      p = Point3(v.x(), v.y(), v.z());
-                VertexIndex vertex_index = m_nativeMeshPreference.add_vertex(p);
-                auto        coord        = textureCoordArray->at(i);
-                std::cout << "color:" << image->getColor(coord).r() << image->getColor(coord).g()
-                          << image->getColor(coord).b() << std::endl;
-                vcmap[vertex_index]      =  CGAL::IO::Color(image->getColor(coord).r()*255,
-                                                      image->getColor(coord).g() * 255,
-                                                      image->getColor(coord).b() * 255);*/
+                vcg::Point3f p(v.x(), v.y(), v.z()); 
+                auto         coord = textureCoordArray->at(i);
+                coordVec.push_back(p);
+                colors.push_back(vcg::Color4b(image->getColor(coord).r() * 255,
+                                        image->getColor(coord).g() * 255,
+                                        image->getColor(coord).b() * 255,
+                                        255));
             }
 
             auto faces_uint   = dynamic_cast<osg::DrawElementsUInt*>(geom->getPrimitiveSet(0));
@@ -87,7 +89,20 @@ public:
                 index.Z() = faces[i+2];
                 indexVec.push_back(index);
             }
-            vcg::tri::BuildMeshFromCoordVectorIndexVector(m_mesh, coordVec, indexVec);
+            auto v_iter = vcg::tri::Allocator<MyMesh>::AddVertices(m_mesh, coordVec.size());
+            // vertices
+            for (size_t i = 0; i < coordVec.size(); i++, v_iter++) {
+                (*v_iter).P()[0] = coordVec[i].X();
+                (*v_iter).P()[1] = coordVec[i].Y();
+                (*v_iter).P()[2] = coordVec[i].Z();
+            }
+
+            for (size_t i = 0; i < indexVec.size(); i++) {
+                vcg::tri::Allocator<MyMesh>::AddFace(m_mesh,
+                                                     &m_mesh.vert[indexVec[i].X()],
+                                                     &m_mesh.vert[indexVec[i].Y()],
+                                                     &m_mesh.vert[indexVec[i].Z()]);
+            }
         }
     }
     MyMesh m_mesh;
@@ -112,7 +127,6 @@ TEST(VCG, CREATE)
         coordVec.push_back(vcg::Point3f(sin(angleRad), cos(angleRad), 0));
         indexVec.push_back(vcg::Point3i(0, i + 1, 1 + (i + 1) % 36));
     }
-
-    vcg::tri::BuildMeshFromCoordVectorIndexVector(diskMesh, coordVec, indexVec);
+   
     vcg::tri::io::ExporterOFF<MyMesh>::Save(meshVisitor.m_mesh, "disc.off");
 }
