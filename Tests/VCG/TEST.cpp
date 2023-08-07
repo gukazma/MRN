@@ -20,12 +20,44 @@ struct MyUsedTypes
 
 class MyVertex : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3f, vcg::vertex::Normal3f,
                                     vcg::vertex::Color4b, vcg::vertex::BitFlags>
-{};
+{
+public:
+    static bool HasColor() { return true; }
+};
 class MyFace : public vcg::Face<MyUsedTypes, vcg::face::VertexRef, vcg::face::Normal3f,
                                 vcg::face::Color4b, vcg::face::BitFlags>
 {};
 class MyMesh : public vcg::tri::TriMesh<std::vector<MyVertex>, std::vector<MyFace>>
 {};
+
+class MyVertexOcf;
+class MyFaceOcf;
+
+struct MyUsedTypesOcf
+    : public vcg::UsedTypes<vcg::Use<MyVertexOcf>::AsVertexType, vcg::Use<MyFaceOcf>::AsFaceType>
+{};
+
+class MyVertexOcf
+    : public vcg::Vertex<MyUsedTypesOcf,
+                         vcg::vertex::InfoOcf,   //   <--- Note the use of the 'special' InfoOcf
+                                                 //   component
+                         vcg::vertex::Coord3f, vcg::vertex::QualityfOcf, vcg::vertex::Color4b,
+                         vcg::vertex::BitFlags, vcg::vertex::Normal3f, vcg::vertex::VFAdjOcf>
+{};
+
+class MyFaceOcf
+    : public vcg::Face<MyUsedTypesOcf,
+                       vcg::face::InfoOcf,   //   <--- Note the use of the 'special' InfoOcf
+                                             //   component
+                       vcg::face::FFAdjOcf, vcg::face::VFAdjOcf, vcg::face::Color4bOcf,
+                       vcg::face::VertexRef, vcg::face::BitFlags, vcg::face::Normal3fOcf>
+{};
+
+// the mesh class must make use of the 'vector_ocf' containers instead of the classical std::vector
+class MyMeshOcf : public vcg::tri::TriMesh<vcg::vertex::vector_ocf<MyVertexOcf>,
+                                           vcg::face::vector_ocf<MyFaceOcf>>
+{};
+
 
 class OSGBMeshVisitor : public osg::NodeVisitor
 {
@@ -89,23 +121,25 @@ public:
                 index.Z() = faces[i+2];
                 indexVec.push_back(index);
             }
-            auto v_iter = vcg::tri::Allocator<MyMesh>::AddVertices(m_mesh, coordVec.size());
+            auto v_iter = vcg::tri::Allocator<MyMeshOcf>::AddVertices(m_mesh, coordVec.size());
+            m_mesh.face.EnableColor();
             // vertices
             for (size_t i = 0; i < coordVec.size(); i++, v_iter++) {
                 (*v_iter).P()[0] = coordVec[i].X();
                 (*v_iter).P()[1] = coordVec[i].Y();
                 (*v_iter).P()[2] = coordVec[i].Z();
+                (*v_iter).C().Import(colors[i]);
             }
 
             for (size_t i = 0; i < indexVec.size(); i++) {
-                vcg::tri::Allocator<MyMesh>::AddFace(m_mesh,
+                vcg::tri::Allocator<MyMeshOcf>::AddFace(m_mesh,
                                                      &m_mesh.vert[indexVec[i].X()],
                                                      &m_mesh.vert[indexVec[i].Y()],
                                                      &m_mesh.vert[indexVec[i].Z()]);
             }
         }
     }
-    MyMesh m_mesh;
+    MyMeshOcf m_mesh;
 };
 
 TEST(VCG, CREATE)
@@ -114,7 +148,6 @@ TEST(VCG, CREATE)
     boost::filesystem::path MRNDataPath = env["MRNDATA"].to_string();
     boost::filesystem::path path = MRNDataPath / "osgb/Tile_+000_+014/Tile_+000_+014_15_0.osgb";
     MyMesh diskMesh;
-
     auto            node = osgDB::readNodeFile(path.generic_string().c_str());
     OSGBMeshVisitor meshVisitor;
     node->accept(meshVisitor);
@@ -128,5 +161,6 @@ TEST(VCG, CREATE)
         indexVec.push_back(vcg::Point3i(0, i + 1, 1 + (i + 1) % 36));
     }
    
-    vcg::tri::io::ExporterOFF<MyMesh>::Save(meshVisitor.m_mesh, "disc.off");
+    vcg::tri::io::ExporterOFF<MyMeshOcf>::Save(
+        meshVisitor.m_mesh, "disc.off", vcg::tri::io::Mask::IOM_VERTCOLOR);
 }
