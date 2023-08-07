@@ -18,6 +18,11 @@ namespace MRN
         m_meshImplement->write(path_);
     }
 
+    void Mesh::simpilify(float percent_)
+    {
+        m_meshImplement->simpilify(percent_);
+    }
+
 
     MyMeshOcf& Mesh::getNativMesh()
     {

@@ -2,6 +2,8 @@
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/update/color.h>
 #include <wrap/io_trimesh/export_off.h>
+#include <vcg/complex/algorithms/local_optimization.h>
+#include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
 class MyFace;
 class MyVertex;
 
@@ -34,7 +36,13 @@ class MyVertexOcf
                                                  //   component
                          vcg::vertex::Coord3f, vcg::vertex::QualityfOcf, vcg::vertex::Color4b,
                          vcg::vertex::BitFlags, vcg::vertex::Normal3f, vcg::vertex::VFAdjOcf>
-{};
+{
+public:
+    vcg::math::Quadric<double>& Qd() { return q; }
+
+private:
+    vcg::math::Quadric<double> q;
+};
 
 class MyFaceOcf
     : public vcg::Face<MyUsedTypesOcf,
@@ -48,3 +56,17 @@ class MyFaceOcf
 class MyMeshOcf : public vcg::tri::TriMesh<vcg::vertex::vector_ocf<MyVertexOcf>,
                                            vcg::face::vector_ocf<MyFaceOcf>>
 {};
+typedef vcg::tri::BasicVertexPair<MyVertexOcf> VertexPair;
+class MyTriEdgeCollapse
+    : public vcg::tri::TriEdgeCollapseQuadric<MyMeshOcf, VertexPair, MyTriEdgeCollapse,
+                                              vcg::tri::QInfoStandard<MyVertexOcf>>
+{
+public:
+    typedef vcg::tri::TriEdgeCollapseQuadric<MyMeshOcf, VertexPair, MyTriEdgeCollapse,
+                                             vcg::tri::QInfoStandard<MyVertexOcf>>
+                                         TECQ;
+    typedef MyMeshOcf::VertexType::EdgeType EdgeType;
+    inline MyTriEdgeCollapse(const VertexPair& p, int i, vcg::BaseParameterClass* pp)
+        : TECQ(p, i, pp)
+    {}
+};

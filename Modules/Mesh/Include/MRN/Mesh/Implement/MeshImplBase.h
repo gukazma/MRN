@@ -10,6 +10,8 @@ public:
     MeshImplBase() = default;
     virtual void read(const boost::filesystem::path& path_) = 0;
     virtual void write(const boost::filesystem::path& path_);
+    void simpilify(float percent_);
+
     MyMeshOcf& getNativeMesh();
 
 protected:
