@@ -13,6 +13,22 @@ void MeshImplBase::write(const boost::filesystem::path& path_) {
 }
 void MeshImplBase::simpilify(float percent_)
 {
+    m_nativeMesh.face.EnableVFAdjacency();
+    m_nativeMesh.face.EnableFFAdjacency();
+    m_nativeMesh.vert.EnableVFAdjacency();
+    vcg::tri::UpdateTopology<MyMeshOcf>::VertexFace(m_nativeMesh);
+    vcg::tri::UpdateTopology<MyMeshOcf>::FaceFace(m_nativeMesh);
+    
+
+    vcg::tri::UpdateFlags<MyMeshOcf>::FaceBorderFromFF(m_nativeMesh);
+
+    m_nativeMesh.face.EnableNormal();   // remove this line and you will throw an exception for a
+                                        // missing
+                                // 'normal' component
+    vcg::tri::UpdateNormal<MyMeshOcf>::PerVertexPerFace(m_nativeMesh);
+
+    //m_nativeMesh.vert.EnableQuality();
+
     int FinalSize = m_nativeMesh.face.size() * percent_;
     double TargetError = 1000000;
     vcg::tri::TriEdgeCollapseQuadricParameter qparams;
