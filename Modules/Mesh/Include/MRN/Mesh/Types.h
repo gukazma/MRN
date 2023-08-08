@@ -4,38 +4,19 @@
 #include <wrap/io_trimesh/export_off.h>
 #include <vcg/complex/algorithms/local_optimization.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
-class MyFace;
 class MyVertex;
+class MyEdge;
+class MyFace;
 
-struct MyUsedTypes
-    : public vcg::UsedTypes<vcg::Use<MyVertex>::AsVertexType, vcg::Use<MyFace>::AsFaceType>
+struct MyUsedTypes : public vcg::UsedTypes<vcg::Use<MyVertex>::AsVertexType,
+                                           vcg::Use<MyEdge>::AsEdgeType,
+                            vcg::Use<MyFace>::AsFaceType>
 {};
 
-class MyVertex : public vcg::Vertex<MyUsedTypes, vcg::vertex::Coord3f, vcg::vertex::Normal3f,
-                                    vcg::vertex::Color4b, vcg::vertex::BitFlags>
-{
-public:
-    static bool HasColor() { return true; }
-};
-class MyFace : public vcg::Face<MyUsedTypes, vcg::face::VertexRef, vcg::face::Normal3f,
-                                vcg::face::Color4b, vcg::face::BitFlags>
-{};
-class MyMesh : public vcg::tri::TriMesh<std::vector<MyVertex>, std::vector<MyFace>>
-{};
-
-class MyVertexOcf;
-class MyFaceOcf;
-
-struct MyUsedTypesOcf
-    : public vcg::UsedTypes<vcg::Use<MyVertexOcf>::AsVertexType, vcg::Use<MyFaceOcf>::AsFaceType>
-{};
-
-class MyVertexOcf
-    : public vcg::Vertex<MyUsedTypesOcf,
-                         vcg::vertex::InfoOcf,   //   <--- Note the use of the 'special' InfoOcf
-                                                 //   component
-                         vcg::vertex::Coord3f, vcg::vertex::QualityfOcf, vcg::vertex::Color4b,
-                         vcg::vertex::BitFlags, vcg::vertex::Normal3f, vcg::vertex::VFAdjOcf>
+class MyVertex
+    : public vcg::Vertex<MyUsedTypes, vcg::vertex::VFAdj, vcg::vertex::Coord3f,
+                                    vcg::vertex::Color4b, vcg::vertex::Mark, vcg::vertex::Qualityf,
+                                    vcg::vertex::BitFlags>
 {
 public:
     vcg::math::Quadric<double>& Qd() { return q; }
@@ -44,28 +25,29 @@ private:
     vcg::math::Quadric<double> q;
 };
 
-class MyFaceOcf
-    : public vcg::Face<MyUsedTypesOcf,
-                       vcg::face::InfoOcf,   //   <--- Note the use of the 'special' InfoOcf
-                                             //   component
-                       vcg::face::FFAdjOcf, vcg::face::VFAdjOcf, vcg::face::Color4bOcf,
-                       vcg::face::VertexRef, vcg::face::BitFlags, vcg::face::Normal3fOcf>
+class MyEdge : public vcg::Edge<MyUsedTypes>
 {};
 
-// the mesh class must make use of the 'vector_ocf' containers instead of the classical std::vector
-class MyMeshOcf : public vcg::tri::TriMesh<vcg::vertex::vector_ocf<MyVertexOcf>,
-                                           vcg::face::vector_ocf<MyFaceOcf>>
+typedef vcg::tri::BasicVertexPair<MyVertex> VertexPair;
+
+class MyFace
+    : public vcg::Face<MyUsedTypes, vcg::face::VFAdj, vcg::face::VertexRef, vcg::face::BitFlags>
 {};
-typedef vcg::tri::BasicVertexPair<MyVertexOcf> VertexPair;
+
+// the main mesh class
+class MyMesh : public vcg::tri::TriMesh<std::vector<MyVertex>, std::vector<MyFace>>
+{};
+
+
 class MyTriEdgeCollapse
-    : public vcg::tri::TriEdgeCollapseQuadric<MyMeshOcf, VertexPair, MyTriEdgeCollapse,
-                                              vcg::tri::QInfoStandard<MyVertexOcf>>
+    : public vcg::tri::TriEdgeCollapseQuadric<MyMesh, VertexPair, MyTriEdgeCollapse,
+                                              vcg::tri::QInfoStandard<MyVertex>>
 {
 public:
-    typedef vcg::tri::TriEdgeCollapseQuadric<MyMeshOcf, VertexPair, MyTriEdgeCollapse,
-                                             vcg::tri::QInfoStandard<MyVertexOcf>>
+    typedef vcg::tri::TriEdgeCollapseQuadric<MyMesh, VertexPair, MyTriEdgeCollapse,
+                                             vcg::tri::QInfoStandard<MyVertex>>
                                          TECQ;
-    typedef MyMeshOcf::VertexType::EdgeType EdgeType;
+    typedef MyMesh::VertexType::EdgeType EdgeType;
     inline MyTriEdgeCollapse(const VertexPair& p, int i, vcg::BaseParameterClass* pp)
         : TECQ(p, i, pp)
     {}

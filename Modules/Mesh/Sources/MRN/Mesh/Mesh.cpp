@@ -24,7 +24,7 @@ namespace MRN
     }
 
 
-    MyMeshOcf& Mesh::getNativMesh()
+    MyMesh& Mesh::getNativMesh()
     {
         return m_meshImplement->getNativeMesh();
     }

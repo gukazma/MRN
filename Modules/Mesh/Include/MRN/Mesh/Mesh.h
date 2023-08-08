@@ -16,7 +16,7 @@ public:
     explicit Mesh(const boost::filesystem::path& path_, DataType type = OSGB);
     void write(const boost::filesystem::path& path_);
     void       simpilify(float percent_);
-    MyMeshOcf& getNativMesh();
+    MyMesh& getNativMesh();
 
 private:
     std::shared_ptr<MeshImplBase> m_meshImplement;

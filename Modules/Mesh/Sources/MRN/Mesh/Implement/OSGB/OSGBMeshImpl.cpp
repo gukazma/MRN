@@ -11,7 +11,7 @@ namespace MRN
 class OSGBMeshVisitor : public osg::NodeVisitor
 {
 public:
-    OSGBMeshVisitor(MyMeshOcf& mesh_)
+    OSGBMeshVisitor(MyMesh& mesh_)
         : m_mesh(mesh_), osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
     {}
 
@@ -70,8 +70,7 @@ public:
                 index.Z() = faces[i + 2];
                 indexVec.push_back(index);
             }
-            auto v_iter = vcg::tri::Allocator<MyMeshOcf>::AddVertices(m_mesh, coordVec.size());
-            m_mesh.face.EnableColor();
+            auto v_iter = vcg::tri::Allocator<MyMesh>::AddVertices(m_mesh, coordVec.size());
             // vertices
             for (size_t i = 0; i < coordVec.size(); i++, v_iter++) {
                 (*v_iter).P()[0] = coordVec[i].X();
@@ -81,14 +80,14 @@ public:
             }
 
             for (size_t i = 0; i < indexVec.size(); i++) {
-                vcg::tri::Allocator<MyMeshOcf>::AddFace(m_mesh,
-                                                        &m_mesh.vert[indexVec[i].X()],
-                                                        &m_mesh.vert[indexVec[i].Y()],
-                                                        &m_mesh.vert[indexVec[i].Z()]);
+                vcg::tri::Allocator<MyMesh>::AddFace(m_mesh,
+                                                     &m_mesh.vert[indexVec[i].X()],
+                                                     &m_mesh.vert[indexVec[i].Y()],
+                                                     &m_mesh.vert[indexVec[i].Z()]);
             }
         }
     }
-    MyMeshOcf& m_mesh;
+    MyMesh& m_mesh;
 };
 
 void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_) {
@@ -113,9 +112,9 @@ void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
         }
 
         for (size_t i = 0; i < m_nativeMesh.face.size(); i++) {
-            indices->push_back(m_nativeMesh.face[i].V(0)->Index());
-            indices->push_back(m_nativeMesh.face[i].V(1)->Index());
-            indices->push_back(m_nativeMesh.face[i].V(2)->Index());
+            indices->push_back(m_nativeMesh.face[i].V(0) - &m_nativeMesh.vert[0]);
+            indices->push_back(m_nativeMesh.face[i].V(1) - &m_nativeMesh.vert[0]);
+            indices->push_back(m_nativeMesh.face[i].V(2) - &m_nativeMesh.vert[0]);
         }
         
         osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;

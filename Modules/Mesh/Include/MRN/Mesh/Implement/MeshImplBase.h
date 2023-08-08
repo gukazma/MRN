@@ -12,9 +12,9 @@ public:
     virtual void write(const boost::filesystem::path& path_);
     void simpilify(float percent_);
 
-    MyMeshOcf& getNativeMesh();
+    MyMesh& getNativeMesh();
 
 protected:
-    MyMeshOcf m_nativeMesh;
+    MyMesh m_nativeMesh;
 };
 }
