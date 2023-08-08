@@ -18,21 +18,13 @@ namespace MRN
         m_meshImplement->write(path_);
     }
 
-    void Mesh::join(Mesh& other) {
-        m_meshImplement->join(*(other.m_meshImplement));
-    }
-
-    void Mesh::simplify()
+    void Mesh::simpilify(float percent_)
     {
-        m_meshImplement->simplify();
+        m_meshImplement->simpilify(percent_);
     }
 
-    void Mesh::removeSmallComponents(size_t threshold)
-    {
-        m_meshImplement->removeSmallComponents(threshold);
-    }
 
-    SurfaceMesh& Mesh::getNativMesh()
+    MyMesh& Mesh::getNativMesh()
     {
         return m_meshImplement->getNativeMesh();
     }
