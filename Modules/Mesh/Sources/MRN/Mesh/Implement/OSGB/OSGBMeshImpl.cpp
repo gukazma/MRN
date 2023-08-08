@@ -6,6 +6,7 @@
 #include <CGAL/IO/Color.h>
 #include <vector>
 #include <fstream>
+#include <unordered_map>
 namespace MRN
 {
 class OSGBMeshVisitor : public osg::NodeVisitor
@@ -95,6 +96,14 @@ void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_) {
     OSGBMeshVisitor meshVisitor(m_nativeMesh);
     node->accept(meshVisitor);
 }
+
+
+size_t findIndex(MyVertex& v_, osg::ref_ptr<osg::Vec3Array> vertices) {
+    for (size_t i = 0; i < vertices->size(); i++) {
+        osg::Vec3 v(v_.P()[0], v_.P()[1], v_.P()[2]);
+        if (v == vertices->at(i)) return i;
+    }
+}
 void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
     if (path_.extension() == ".osgb" || path_.extension() == ".osgt") {
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
@@ -103,18 +112,21 @@ void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
         
         osg::ref_ptr<osg::DrawElementsUInt> indices =
             new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES);
-
         for (size_t i = 0; i < m_nativeMesh.vert.size(); i++) {
-            auto p = m_nativeMesh.vert[i].P();
+            auto v = m_nativeMesh.vert[i];
+
+            if (v.IsD()) continue;
+            auto p = v.P();
             vertices->push_back({p[0], p[1], p[2]});
-            auto c = m_nativeMesh.vert[i].C();
+            auto c = v.C();
             colors->push_back({c[0] / 255.0f, c[1] / 255.0f, c[2] / 255.0f, c[3] / 255.0f});
         }
-
+        
         for (size_t i = 0; i < m_nativeMesh.face.size(); i++) {
-            indices->push_back(m_nativeMesh.face[i].V(0) - &m_nativeMesh.vert[0]);
-            indices->push_back(m_nativeMesh.face[i].V(1) - &m_nativeMesh.vert[0]);
-            indices->push_back(m_nativeMesh.face[i].V(2) - &m_nativeMesh.vert[0]);
+            if (m_nativeMesh.face[i].IsD()) continue;
+            indices->push_back(findIndex(*m_nativeMesh.face[i].V(0), vertices));
+            indices->push_back(findIndex(*m_nativeMesh.face[i].V(1), vertices));
+            indices->push_back(findIndex(*m_nativeMesh.face[i].V(2), vertices));
         }
         
         osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
