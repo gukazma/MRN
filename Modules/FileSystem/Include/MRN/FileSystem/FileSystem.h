@@ -14,7 +14,7 @@ public:
     {
         SoarscapeOSGB = 0,
     };
-    FileSystem(const boost::filesystem::path& dir_, Type type);
+    FileSystem(const boost::filesystem::path& dir_, Type type = SoarscapeOSGB);
     void getTileArray(TileArray& tileArray);
 
 private:

@@ -10,13 +10,22 @@ struct Tile
     std::vector<Tile>       parentPaths;
     double                  threshold;
 };
-class TileArray : public std::vector<std::vector<boost::optional<Tile>>>
+class TileArray : public std::vector<std::vector<std::vector<boost::optional<Tile>>>>
 {
-    size_t rows() { return this->size(); }
-    size_t columns()
+    size_t level() { return this->size(); }
+    size_t rows()
     {
         if (this->size() == 0) return 0;
         return (*this)[0].size();
+    }
+
+    size_t columns()
+    {
+        if (this->size() == 0) return 0;
+        
+        if((*this)[0].size() == 0) return 0;
+
+        return (*this)[0][0].size();
     }
 
     float simplify_level = 1.0f;
