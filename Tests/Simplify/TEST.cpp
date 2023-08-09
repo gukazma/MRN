@@ -173,14 +173,12 @@ TEST(MRN, Simplify)
     OSGBMeshVisitor* visitor = new OSGBMeshVisitor;
     node->accept(*visitor);
     auto& mesh      = visitor->m_mesh;
-    int FinalSize = 100;
+    int FinalSize = 500;
     
     TriEdgeCollapseQuadricParameter qparams;
     qparams.QualityThr  = .3;
     double TargetError  = std::numeric_limits<double>::max();
     bool   CleaningFlag = false;
-   
-
 
     vcg::tri::UpdateBounding<MyMesh>::Box(mesh);
 
@@ -209,6 +207,6 @@ TEST(MRN, Simplify)
     printf("\nCompleted in (%5.3f+%5.3f) sec\n",
            float(t2 - t1) / CLOCKS_PER_SEC,
            float(t3 - t2) / CLOCKS_PER_SEC);
-    vcg::tri::io::ExporterPLY<MyMesh>::Save(mesh, "aaa.ply", ::vcg::tri::io::Mask::IOM_VERTCOLOR);
+    vcg::tri::io::ExporterPLY<MyMesh>::Save(mesh, "G:/Data/MRNDATA/output/aaa.ply", ::vcg::tri::io::Mask::IOM_VERTCOLOR);
     //MRN::Mesh               mesh(MRNDataPath / "osgb/Tile_+000_+014/Tile_+000_+014_15_0.osgb");
 }
