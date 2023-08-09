@@ -87,6 +87,9 @@ public:
                                                      &m_mesh.vert[indexVec[i].Z()]);
             }
         }
+        vcg::tri::UpdateTopology<MyMesh>::VertexFace(m_mesh);
+        vcg::tri::UpdateFlags<MyMesh>::FaceBorderFromVF(m_mesh);
+        vcg::tri::UpdateFlags<MyMesh>::VertexBorderFromFaceBorder(m_mesh);
     }
     MyMesh& m_mesh;
 };

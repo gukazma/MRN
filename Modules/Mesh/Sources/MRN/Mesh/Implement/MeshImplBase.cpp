@@ -16,6 +16,7 @@ void MeshImplBase::simpilify(float percent_)
     int                                       FinalSize = m_nativeMesh.FN() * percent_;
     vcg::tri::TriEdgeCollapseQuadricParameter qparams;
     qparams.QualityThr  = .3;
+    qparams.PreserveBoundary  = false;
     double TargetError  = std::numeric_limits<double>::max();
     bool   CleaningFlag = false;
 
