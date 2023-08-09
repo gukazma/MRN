@@ -9,7 +9,7 @@ struct Tile
     boost::filesystem::path tilePath;
     std::vector<Tile>       parentPaths;
     double                  threshold;
-    float                   simplify_level = 1.0f;
+    float                   simplifyLevel = 1.0f;
 };
 class TileArray : public std::vector<std::vector<std::vector<boost::optional<Tile>>>>
 {
@@ -28,7 +28,5 @@ class TileArray : public std::vector<std::vector<std::vector<boost::optional<Til
 
         return (*this)[0][0].size();
     }
-
-    float simplify_level = 1.0f;
 };
 }
