@@ -5,7 +5,7 @@
 #include <wrap/io_trimesh/export.h>
 #include <vcg/complex/algorithms/local_optimization.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
-
+#include <vcg/space/index/kdtree/kdtree.h>
 namespace MRN
 {
 void MeshImplBase::write(const boost::filesystem::path& path_) {
@@ -50,6 +50,21 @@ void MeshImplBase::simpilify(float percent_)
     int dup   = vcg::tri::Clean<MyMesh>::RemoveDuplicateVertex(m_nativeMesh);
     int unref = vcg::tri::Clean<MyMesh>::RemoveUnreferencedVertex(m_nativeMesh);
     printf("Removed %i duplicate and %i unreferenced vertices from mesh \n", dup, unref);
+}
+MyVertex MeshImplBase::getClosest(vcg::Point3f point)
+{
+    std::cout << "===================================================" << std::endl;
+    std::cout << "KDTree" << std::endl;
+    // Construction of the kdTree
+    vcg::ConstDataWrapper<MyMesh::VertexType::CoordType> wrapperVcg(
+        &m_nativeMesh.vert[0].P(),
+        m_nativeMesh.vert.size(),
+        size_t(m_nativeMesh.vert[1].P().V()) - size_t(m_nativeMesh.vert[0].P().V()));
+    vcg::KdTree<MyMesh::ScalarType> kdTreeVcg(wrapperVcg);
+    unsigned int                             index = 0;
+    float                                    minidistance;
+    kdTreeVcg.doQueryClosest(point, index, minidistance);
+    return m_nativeMesh.vert[index];
 }
 MyMesh& MeshImplBase::getNativeMesh()
 {

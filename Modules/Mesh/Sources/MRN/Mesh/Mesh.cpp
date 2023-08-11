@@ -23,6 +23,11 @@ namespace MRN
         m_meshImplement->simpilify(percent_);
     }
 
+    MyVertex Mesh::getClosest(vcg::Point3f point)
+    {
+        return m_meshImplement->getClosest(point);
+    }
+
 
     MyMesh& Mesh::getNativMesh()
     {
