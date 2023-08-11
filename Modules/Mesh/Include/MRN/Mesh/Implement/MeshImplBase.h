@@ -8,7 +8,7 @@ class MeshImplBase
 {
 public:
     MeshImplBase() = default;
-    virtual void read(const boost::filesystem::path& path_) = 0;
+    virtual void read(const boost::filesystem::path& path_);
     virtual void write(const boost::filesystem::path& path_);
     void simpilify(float percent_);
     MyVertex getClosest(vcg::Point3f point);

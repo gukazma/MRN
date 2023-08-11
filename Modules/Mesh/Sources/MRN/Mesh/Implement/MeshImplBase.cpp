@@ -3,12 +3,16 @@
 #include <boost/thread.hpp>
 #include <boost/range/algorithm.hpp>
 #include <wrap/io_trimesh/export.h>
+#include <wrap/io_trimesh/import.h>
 #include <vcg/complex/algorithms/local_optimization.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
 #include <vcg/space/index/kdtree/kdtree.h>
-namespace MRN
+namespace MRN {
+void MeshImplBase::read(const boost::filesystem::path& path_) {
+    vcg::tri::io::Importer<MyMesh>::Open(m_nativeMesh, path_.generic_string().c_str());
+}
+void MeshImplBase::write(const boost::filesystem::path& path_)
 {
-void MeshImplBase::write(const boost::filesystem::path& path_) {
     vcg::tri::io::Exporter<MyMesh>::Save(m_nativeMesh, path_.generic_string().c_str());
 }
 void MeshImplBase::simpilify(float percent_)
