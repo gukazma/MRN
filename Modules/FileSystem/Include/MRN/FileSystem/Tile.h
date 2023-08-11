@@ -10,6 +10,17 @@ struct Tile
     std::vector<Tile>       parentPaths;
     double                  threshold;
     float                   simplifyLevel = 1.0f;
+    Tile() { 
+        level = 0;
+        tilePath = "";
+        threshold = 0;
+    };
+    Tile(const Tile& other)
+        : level(other.level)
+        , tilePath(other.tilePath)
+        , parentPaths(other.parentPaths)
+        , threshold(other.threshold)
+        , simplifyLevel(other.simplifyLevel){};
 };
 class TileArray : public std::vector<std::vector<std::vector<boost::optional<Tile>>>>
 {

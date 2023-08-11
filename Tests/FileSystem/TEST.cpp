@@ -9,4 +9,6 @@ TEST(MRN, soarscapeFileSystem)
     MRN::FileSystem filesystem(inputDir);
     MRN::TileArray          tilearray;
     filesystem.getTileArray(tilearray);
+    auto tp = tilearray[3][0][1]->tilePath;
+    int  tag = 0;
 }
