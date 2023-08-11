@@ -4,6 +4,7 @@
 #include "meshReconstruction.h"
 #include <boost/filesystem.hpp>
 #include <vcg/space/index/kdtree/kdtree.h>
+#include <vcg/complex/algorithms/clean.h>
 namespace MRN {
 Merge::Merge() {}
 void Merge::init(std::vector<Mesh> meshs) {
