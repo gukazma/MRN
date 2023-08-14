@@ -1,5 +1,6 @@
 #pragma once
 #include <MRN/FileSystem/Impl/FileSystemBase.h>
+#include <vcg/space/box3.h>
 
 namespace MRN
 {
@@ -21,5 +22,6 @@ namespace MRN
 
 	private:
         std::string tile_intToString(int tileNumber, int n);
+        vcg::Box3<float> getOsgbBox(boost::filesystem::path tilePath);
 	};
 }

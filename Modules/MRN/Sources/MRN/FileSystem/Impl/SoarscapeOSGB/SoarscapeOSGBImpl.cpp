@@ -1,8 +1,8 @@
 #include <MRN/FileSystem/Impl/SoarscapeOSGB/SoarscapeOSGBImpl.h>
 #include <boost/filesystem.hpp>
-#include <iostream>
 #include <boost/algorithm/string.hpp>
 #include <map>
+#include <iostream>
 
 namespace fs = boost::filesystem;
 namespace MRN
@@ -90,10 +90,11 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray) {
                 Tile t;
                 if (l == 0)
                 {
+                    float box_x, box_y, box_z;
                     if (coordTileMap.find(tileCoord(t_x, t_y)) != coordTileMap.end())
                     {
-                        t.parentPaths.push_back(
-                            (*coordTileMap.find(tileCoord(t_x, t_y))).second);
+                        Tile temp = (*coordTileMap.find(tileCoord(t_x, t_y))).second;
+                        t.parentPaths.push_back(temp);
                     }
                     if (coordTileMap.find(tileCoord(t_x, t_y + 1)) != coordTileMap.end()) 
                     {
@@ -163,5 +164,10 @@ std::string SoarscapeOSGBImpl::tile_intToString(int tileNumber, int n) {
         sTile = "0" + sTile;
     }
     return sTile;
+}
+
+// »ñÈ¡osgbÍß¿éµÄbbox
+vcg::Box3<float> SoarscapeOSGBImpl::getOsgbBox(boost::filesystem::path tilePath) {
+    MRN::Mesh(tilePath);
 }
 }

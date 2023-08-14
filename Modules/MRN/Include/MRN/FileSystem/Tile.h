@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/filesystem/path.hpp>
 #include <boost/optional/optional.hpp>
+#include <vcg/space/box3.h>
 namespace MRN
 {
 struct Tile
@@ -10,6 +11,7 @@ struct Tile
     std::vector<Tile>       parentPaths;
     double                  threshold;
     float                   simplifyLevel = 1.0f;
+    vcg::Box3<float>        box;
     Tile() { 
         level = 0;
         tilePath = "";

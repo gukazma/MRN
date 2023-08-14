@@ -1,4 +1,4 @@
-set(TARGET_NAME MRN)
+set(TARGET_NAME MRNApp)
 
 # for qt
 # just for qt
