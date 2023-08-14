@@ -8,7 +8,9 @@ namespace MRN
              m_meshImplement = std::make_shared<OSGBMeshImpleMesh>();
              break;
         case MRN::Mesh::GLTF: break;
-        default: break;
+        default: 
+             m_meshImplement = std::make_shared<MeshImplBase>();
+            break;
         }
         m_meshImplement->read(path_);
 	}

@@ -7,6 +7,18 @@
 #include <vector>
 #include <fstream>
 #include <unordered_map>
+#include <vcg/complex/algorithms/clean.h>
+
+namespace std {
+template<> struct hash<vcg::Point3f>
+{
+    size_t operator()(vcg::Point3f const& vertex) const
+    {
+        return ((hash<float>()(vertex[0]) ^ (hash<float>()(vertex[2]) << 1)) >> 1) ^
+               (hash<float>()(vertex[1]) << 1);
+    }
+};
+}   // namespace std
 namespace MRN
 {
 class OSGBMeshVisitor : public osg::NodeVisitor
@@ -95,6 +107,10 @@ public:
 };
 
 void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_) {
+    if (!(path_.extension() == ".osgb" || path_.extension() == ".osgt")) {
+        MeshImplBase::read(path_);
+        return;
+    }
     auto            node = osgDB::readNodeFile(path_.generic_string().c_str());
     OSGBMeshVisitor meshVisitor(m_nativeMesh);
     node->accept(meshVisitor);
@@ -108,28 +124,32 @@ size_t findIndex(MyVertex& v_, osg::ref_ptr<osg::Vec3Array> vertices) {
     }
 }
 void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
+    vcg::tri::Clean<MyMesh>::RemoveDuplicateVertex(m_nativeMesh);
     if (path_.extension() == ".osgb" || path_.extension() == ".osgt") {
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
         osg::ref_ptr<osg::Vec4Array> colors   = new osg::Vec4Array();
-
+        std::unordered_map<vcg::Point3f, int> vimap;
+        std::unordered_map<vcg::Point3f, vcg::Color4b> vcmap;
         
         osg::ref_ptr<osg::DrawElementsUInt> indices =
             new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES);
         for (size_t i = 0; i < m_nativeMesh.vert.size(); i++) {
-            auto v = m_nativeMesh.vert[i];
+            auto& v = m_nativeMesh.vert[i];
 
             if (v.IsD()) continue;
             auto p = v.P();
+            vimap[p] = vertices->size();
             vertices->push_back({p[0], p[1], p[2]});
             auto c = v.C();
+            vcmap[p] = c;
             colors->push_back({c[0] / 255.0f, c[1] / 255.0f, c[2] / 255.0f, c[3] / 255.0f});
         }
         
         for (size_t i = 0; i < m_nativeMesh.face.size(); i++) {
             if (m_nativeMesh.face[i].IsD()) continue;
-            indices->push_back(findIndex(*m_nativeMesh.face[i].V(0), vertices));
-            indices->push_back(findIndex(*m_nativeMesh.face[i].V(1), vertices));
-            indices->push_back(findIndex(*m_nativeMesh.face[i].V(2), vertices));
+            indices->push_back(vimap[m_nativeMesh.face[i].V(0)->P()]);
+            indices->push_back(vimap[m_nativeMesh.face[i].V(1)->P()]);
+            indices->push_back(vimap[m_nativeMesh.face[i].V(2)->P()]);
         }
         
         osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
