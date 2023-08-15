@@ -22,6 +22,5 @@ namespace MRN
 
 	private:
         std::string tile_intToString(int tileNumber, int n);
-        vcg::Box3<float> getOsgbBox(boost::filesystem::path tilePath);
 	};
 }

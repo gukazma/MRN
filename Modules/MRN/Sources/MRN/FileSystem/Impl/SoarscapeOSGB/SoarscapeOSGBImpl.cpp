@@ -1,3 +1,4 @@
+#include <MRN/Mesh/Mesh.h>
 #include <MRN/FileSystem/Impl/SoarscapeOSGB/SoarscapeOSGBImpl.h>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -72,6 +73,8 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray) {
                 Tile t;
                 t.level = minLevel;
                 t.tilePath = file.path();
+                MRN::Mesh mesh(file.path());
+                t.box            = mesh.getNativMesh().bbox;
                 coordTileMap[tc] = t;
             }
         }
@@ -88,39 +91,62 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray) {
             std::vector<boost::optional<Tile>> temp_x;
             for (int t_y = minTile->y; t_y < maxTile->y; t_y += 2) {
                 Tile t;
+                vcg::Box3<float> tempBox;
+                float            max = FLT_MAX;
+                float            min = -FLT_MAX;
+                tempBox.max          = vcg::Point3f(min, min, min);
+                tempBox.min          = vcg::Point3f(max, max, max);
+                auto updateBbox      = [](vcg::Box3<float>& tBox1, vcg::Box3<float> tBox2) {
+                    if (tBox1.max.X() < tBox2.max.X()) tBox1.max.X() = tBox2.max.X();
+                    if (tBox1.max.Y() < tBox2.max.Y()) tBox1.max.Y() = tBox2.max.Y();
+                    if (tBox1.max.Z() < tBox2.max.Z()) tBox1.max.Z() = tBox2.max.Z();
+                    if (tBox1.min.X() > tBox2.min.X()) tBox1.min.X() = tBox2.min.X();
+                    if (tBox1.min.Y() > tBox2.min.Y()) tBox1.min.Y() = tBox2.min.Y();
+                    if (tBox1.min.Z() > tBox2.min.Z()) tBox1.min.Z() = tBox2.min.Z();
+                };
+
                 if (l == 0)
                 {
-                    float box_x, box_y, box_z;
-                    if (coordTileMap.find(tileCoord(t_x, t_y)) != coordTileMap.end())
-                    {
+                    if (coordTileMap.find(tileCoord(t_x, t_y)) != coordTileMap.end()) {
                         Tile temp = (*coordTileMap.find(tileCoord(t_x, t_y))).second;
+                        updateBbox(tempBox, temp.box);
                         t.parentPaths.push_back(temp);
                     }
-                    if (coordTileMap.find(tileCoord(t_x, t_y + 1)) != coordTileMap.end()) 
-                    {
-                        t.parentPaths.push_back(
-                            (*coordTileMap.find(tileCoord(t_x, t_y + 1))).second);
+                    if (coordTileMap.find(tileCoord(t_x, t_y + 1)) != coordTileMap.end()) {
+                        Tile temp = (*coordTileMap.find(tileCoord(t_x, t_y + 1))).second;
+                        updateBbox(tempBox, temp.box);
+                        t.parentPaths.push_back(temp);
                     }
-                    if (coordTileMap.find(tileCoord(t_x + 1, t_y)) != coordTileMap.end()) 
-                    {
-                        t.parentPaths.push_back(
-                            (*coordTileMap.find(tileCoord(t_x + 1, t_y))).second);
+                    if (coordTileMap.find(tileCoord(t_x + 1, t_y)) != coordTileMap.end()) {
+                        Tile temp = (*coordTileMap.find(tileCoord(t_x + 1, t_y))).second;
+                        updateBbox(tempBox, temp.box);
+                        t.parentPaths.push_back(temp);
                     }
-                    if (coordTileMap.find(tileCoord(t_x + 1, t_y + 1)) != coordTileMap.end()) 
-                    {
-                        t.parentPaths.push_back(
-                            (*coordTileMap.find(tileCoord(t_x + 1, t_y + 1))).second);
+                    if (coordTileMap.find(tileCoord(t_x + 1, t_y + 1)) != coordTileMap.end()) {
+                        Tile temp = (*coordTileMap.find(tileCoord(t_x + 1, t_y + 1))).second;
+                        updateBbox(tempBox, temp.box);
+                        t.parentPaths.push_back(temp);
                     }
                 }
                 else
                 {
                     t.parentPaths.push_back(tileArray[l - 1][t_x][t_y].get());
-                    if (t_y + 1 < maxTile->y) 
-                        t.parentPaths.push_back(tileArray[l - 1][t_x][t_y+1].get());
+                    updateBbox(tempBox, tileArray[l - 1][t_x][t_y].get().box);
+                    if (t_y + 1 < maxTile->y)
+                    {
+                        t.parentPaths.push_back(tileArray[l - 1][t_x][t_y + 1].get());
+                        updateBbox(tempBox, tileArray[l - 1][t_x][t_y + 1].get().box);
+                    }
                     if (t_x + 1 < maxTile->x) 
-                        t.parentPaths.push_back(tileArray[l - 1][t_x+1][t_y].get());
+                    {
+                        t.parentPaths.push_back(tileArray[l - 1][t_x + 1][t_y].get());
+                        updateBbox(tempBox, tileArray[l - 1][t_x + 1][t_y].get().box);
+                    }
                     if (t_x + 1 < maxTile->x && t_y + 1 < maxTile->y) 
-                        t.parentPaths.push_back(tileArray[l - 1][t_x+1][t_y+1].get());
+                    {
+                        t.parentPaths.push_back(tileArray[l - 1][t_x + 1][t_y + 1].get());
+                        updateBbox(tempBox, tileArray[l - 1][t_x + 1][t_y + 1].get().box);
+                    }
                 }
 
                 if (t.parentPaths.empty()) {
@@ -128,7 +154,8 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray) {
                     temp_x.push_back(t_null);
                 }
                 else {
-                    t.level                = minLevel;
+                    t.box                   = tempBox;
+                    t.level                 = minLevel;
                     std::string rootDir     = "RootTiles_L" + std::to_string(minLevel);
                     std::string newTileName = "Tile_+" + tile_intToString(tax, 4) + "_+" +
                                               tile_intToString(tay, 4) + "_L" +
@@ -166,8 +193,4 @@ std::string SoarscapeOSGBImpl::tile_intToString(int tileNumber, int n) {
     return sTile;
 }
 
-// »ñÈ¡osgbÍß¿éµÄbbox
-vcg::Box3<float> SoarscapeOSGBImpl::getOsgbBox(boost::filesystem::path tilePath) {
-    return vcg::Box3<float>();
-}
 }
