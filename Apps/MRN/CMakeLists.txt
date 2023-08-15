@@ -34,6 +34,7 @@ Qt5::Core
 Qt5::Gui
 Qt5::Widgets
 Qt5::OpenGL
+MRN::MRN
 )
 
 target_include_directories(

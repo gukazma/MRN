@@ -15,6 +15,9 @@ public:
     explicit MRNWidget(QWidget *parent = nullptr);
     ~MRNWidget();
 
+private slots:
+    void slot_scan(bool);
+
 private:
     Ui::MRNWidget *ui;
 };
