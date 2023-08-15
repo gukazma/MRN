@@ -13,6 +13,10 @@ namespace MRN
 		bool check() { 
 			return impl.check();
 		}
+		void calculateTileArray() { impl.calculateTileArray();}
+        void merge() { impl.merge(); }
+        void cutCake() { impl.catCake(); }
+        void writeTile() { impl.writeTile(); }
 
 	private:
         T impl;

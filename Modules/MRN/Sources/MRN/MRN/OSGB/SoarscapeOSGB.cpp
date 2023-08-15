@@ -1,4 +1,6 @@
 #include "MRN/MRN/OSGB/SoarscapeOSGB.h"
+#include <MRN/FileSystem/FileSystem.h>
+#include <MRN/Mesh/Mesh.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -16,8 +18,25 @@ bool SoarscapeOSGB::check()
     }
     return false;
 }
-void SoarscapeOSGB::calculateTileArray() {}
-void SoarscapeOSGB::merge() {}
+void SoarscapeOSGB::calculateTileArray() {
+    MRN::FileSystem filesystem(m_path);
+    filesystem.getTileArray(m_tileArray);
+
+    
+}
+void SoarscapeOSGB::merge() {
+    const auto& tileArray = m_tileArray[0];
+    std::vector<MRN::Mesh> meshs;
+    for (size_t x = 0; x < tileArray.size(); x++) {
+        const auto& tileVector = tileArray[x];
+        for (size_t y = 0; y < tileVector.size(); y++) {
+            const auto& tile = tileVector[y];
+            if (!tile.has_value()) continue;
+            std::cout << "tile path: " << tile.value().tilePath << std::endl;
+            meshs.emplace_back(std::move(MRN::Mesh(tile.value().tilePath)));
+        }
+    }
+}
 void SoarscapeOSGB::cutCake() {}
 void SoarscapeOSGB::writeTile() {}
 }

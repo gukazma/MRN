@@ -9,4 +9,7 @@ TEST(MRN, MRN)
     auto                         inputdir    = MRNDataPath / "osgb/MRN";
     MRN::MRN<MRN::SoarscapeOSGB> mrn(inputdir);
     EXPECT_TRUE(mrn.check());
+
+    mrn.calculateTileArray();
+    mrn.merge();
 }
