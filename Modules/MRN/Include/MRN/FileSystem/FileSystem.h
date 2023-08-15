@@ -1,11 +1,10 @@
 #pragma once
+#include "Tile.h"
 #include <boost/filesystem/path.hpp>
+#include <boost/optional.hpp>
 #include <memory>
 #include <vector>
-#include <boost/optional.hpp>
-#include "Tile.h"
-namespace MRN
-{
+namespace MRN {
 class FileSystemBase;
 class FileSystem
 {
@@ -20,4 +19,4 @@ public:
 private:
     std::shared_ptr<FileSystemBase> m_impl;
 };
-}
+}   // namespace MRN

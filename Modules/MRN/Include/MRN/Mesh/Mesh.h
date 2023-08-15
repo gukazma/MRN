@@ -1,7 +1,6 @@
 #pragma once
-#include <memory>
-#include <boost/filesystem/path.hpp>
 #include <MRN/Mesh/Types.h>
+#include <boost/filesystem/path.hpp>
 #include <memory>
 #include <MRN/FileSystem/Tile.h>
 namespace MRN
@@ -26,4 +25,4 @@ public:
 private:
     std::shared_ptr<MeshImplBase> m_meshImplement;
 };
-}
+}   // namespace MRN

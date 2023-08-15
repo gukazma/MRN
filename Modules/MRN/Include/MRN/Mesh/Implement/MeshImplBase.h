@@ -1,6 +1,6 @@
 #pragma once
-#include <boost/filesystem/path.hpp>
 #include <MRN/Mesh/Types.h>
+#include <boost/filesystem/path.hpp>
 #include <unordered_map>
 #include <MRN/FileSystem/Tile.h>
 namespace MRN
@@ -20,4 +20,4 @@ public:
 protected:
     MyMesh m_nativeMesh;
 };
-}
+}   // namespace MRN
