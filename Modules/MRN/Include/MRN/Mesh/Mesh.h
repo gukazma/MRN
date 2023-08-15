@@ -3,6 +3,7 @@
 #include <boost/filesystem/path.hpp>
 #include <MRN/Mesh/Types.h>
 #include <memory>
+#include <MRN/FileSystem/Tile.h>
 namespace MRN
 {
 class MeshImplBase;
@@ -16,6 +17,7 @@ public:
     };
     explicit Mesh(const boost::filesystem::path& path_, DataType type = OSGB);
     void write(const boost::filesystem::path& path_);
+    void     write(const Tile& tile);
     void       simpilify(float percent_);
     MyVertex getClosest(vcg::Point3f point);
 

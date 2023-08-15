@@ -20,6 +20,11 @@ namespace MRN
         m_meshImplement->write(path_);
     }
 
+    void Mesh::write(const Tile& tile)
+    {
+        m_meshImplement->write(tile);
+    }
+
     void Mesh::simpilify(float percent_)
     {
         m_meshImplement->simpilify(percent_);

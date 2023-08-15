@@ -3,6 +3,7 @@
 #include <osgDB/WriteFile>
 #include <osg/NodeVisitor>
 #include <osg/Texture2D>
+#include <osg/PagedLOD>
 #include <CGAL/IO/Color.h>
 #include <vector>
 #include <fstream>
@@ -127,6 +128,7 @@ size_t findIndex(MyVertex& v_, osg::ref_ptr<osg::Vec3Array> vertices) {
 void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
     vcg::tri::Clean<MyMesh>::RemoveDuplicateVertex(m_nativeMesh);
     if (path_.extension() == ".osgb" || path_.extension() == ".osgt") {
+        osg::ref_ptr<osg::PagedLOD> pagedLod = new osg::PagedLOD();
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
         osg::ref_ptr<osg::Vec4Array> colors   = new osg::Vec4Array();
         std::unordered_map<vcg::Point3f, int> vimap;
@@ -153,6 +155,56 @@ void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
             indices->push_back(vimap[m_nativeMesh.face[i].V(2)->P()]);
         }
         
+        osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
+        geometry->setColorArray(colors.get());
+        geometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+        geometry->setVertexArray(vertices);
+        geometry->addPrimitiveSet(indices);
+        osgDB::writeNodeFile(*geometry, path_.generic_string());
+    }
+    else {
+        MeshImplBase::write(path_);
+    }
+}
+void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_, Tile& tile) {
+    vcg::tri::Clean<MyMesh>::RemoveDuplicateVertex(m_nativeMesh);
+    if (path_.extension() == ".osgb" || path_.extension() == ".osgt") {
+        osg::ref_ptr<osg::PagedLOD>                    pagedLod = new osg::PagedLOD();
+        // 设置osgb的相关参数
+        osg::Vec3f       bboxMin(tile.box.min.X(), tile.box.min.Y(), tile.box.min.Z());
+        osg::Vec3f       bboxMax(tile.box.max.X(), tile.box.max.Y(), tile.box.max.Z());
+        osg::BoundingBox bbox(bboxMin, bboxMax);
+        osg::BoundingSphere sphere(bbox);
+        double radius = std::sqrt((bbox.xMax() - bbox.xMin()) * (bbox.xMax() - bbox.xMin()) +
+                                  (bbox.yMax() - bbox.yMin()) * (bbox.yMax() - bbox.yMin()) +
+                                  (bbox.zMax() - bbox.zMin()) * (bbox.zMax() - bbox.zMin()));
+        double threshold = 2.0 * radius / std::pow(2.0, 16 - tile.level);
+        osg::ref_ptr<osg::Vec3Array>                   vertices = new osg::Vec3Array;
+        osg::ref_ptr<osg::Vec4Array>                   colors   = new osg::Vec4Array();
+        std::unordered_map<vcg::Point3f, int>          vimap;
+        std::unordered_map<vcg::Point3f, vcg::Color4b> vcmap;
+
+        osg::ref_ptr<osg::DrawElementsUInt> indices =
+            new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES);
+        for (size_t i = 0; i < m_nativeMesh.vert.size(); i++) {
+            auto& v = m_nativeMesh.vert[i];
+
+            if (v.IsD()) continue;
+            auto p   = v.P();
+            vimap[p] = vertices->size();
+            vertices->push_back({p[0], p[1], p[2]});
+            auto c   = v.C();
+            vcmap[p] = c;
+            colors->push_back({c[0] / 255.0f, c[1] / 255.0f, c[2] / 255.0f, c[3] / 255.0f});
+        }
+
+        for (size_t i = 0; i < m_nativeMesh.face.size(); i++) {
+            if (m_nativeMesh.face[i].IsD()) continue;
+            indices->push_back(vimap[m_nativeMesh.face[i].V(0)->P()]);
+            indices->push_back(vimap[m_nativeMesh.face[i].V(1)->P()]);
+            indices->push_back(vimap[m_nativeMesh.face[i].V(2)->P()]);
+        }
+
         osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
         geometry->setColorArray(colors.get());
         geometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
