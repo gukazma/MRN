@@ -1,11 +1,10 @@
 #pragma once
 #include <MRN/Mesh/Implement/MeshImplBase.h>
-namespace MRN
+namespace MRN {
+class OSGBMeshImpleMesh : public MeshImplBase
 {
-	class OSGBMeshImpleMesh : public MeshImplBase
-	{
-    public:
-        virtual void read(const boost::filesystem::path& path_) override;
-        virtual void write(const boost::filesystem::path& path_) override;
-	};
-}
+public:
+    virtual void read(const boost::filesystem::path& path_) override;
+    virtual void write(const boost::filesystem::path& path_) override;
+};
+}   // namespace MRN

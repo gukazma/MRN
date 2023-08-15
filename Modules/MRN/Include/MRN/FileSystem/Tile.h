@@ -2,8 +2,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/optional/optional.hpp>
 #include <vcg/space/box3.h>
-namespace MRN
-{
+namespace MRN {
 struct Tile
 {
     int                     level;
@@ -25,10 +24,10 @@ class TileArray : public std::vector<std::vector<std::vector<boost::optional<Til
     size_t columns()
     {
         if (this->size() == 0) return 0;
-        
-        if((*this)[0].size() == 0) return 0;
+
+        if ((*this)[0].size() == 0) return 0;
 
         return (*this)[0][0].size();
     }
 };
-}
+}   // namespace MRN

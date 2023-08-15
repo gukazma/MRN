@@ -1,20 +1,19 @@
 #pragma once
-#include <vcg/complex/complex.h>
-#include <vcg/complex/algorithms/update/color.h>
-#include <wrap/io_trimesh/export_off.h>
 #include <vcg/complex/algorithms/local_optimization.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
+#include <vcg/complex/algorithms/update/color.h>
+#include <vcg/complex/complex.h>
+#include <wrap/io_trimesh/export_off.h>
 class MyVertex;
 class MyEdge;
 class MyFace;
 
-struct MyUsedTypes : public vcg::UsedTypes<vcg::Use<MyVertex>::AsVertexType,
-                                           vcg::Use<MyEdge>::AsEdgeType,
+struct MyUsedTypes
+    : public vcg::UsedTypes<vcg::Use<MyVertex>::AsVertexType, vcg::Use<MyEdge>::AsEdgeType,
                             vcg::Use<MyFace>::AsFaceType>
 {};
 
-class MyVertex
-    : public vcg::Vertex<MyUsedTypes, vcg::vertex::VFAdj, vcg::vertex::Coord3f,
+class MyVertex : public vcg::Vertex<MyUsedTypes, vcg::vertex::VFAdj, vcg::vertex::Coord3f,
                                     vcg::vertex::Color4b, vcg::vertex::Mark, vcg::vertex::Qualityf,
                                     vcg::vertex::BitFlags>
 {

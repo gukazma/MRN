@@ -12,14 +12,14 @@ class MRNWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit MRNWidget(QWidget *parent = nullptr);
+    explicit MRNWidget(QWidget* parent = nullptr);
     ~MRNWidget();
 
 private slots:
     void slot_scan(bool);
 
 private:
-    Ui::MRNWidget *ui;
+    Ui::MRNWidget* ui;
 };
 
-#endif // MRNWIDGET_H
+#endif   // MRNWIDGET_H

@@ -1,6 +1,6 @@
 #pragma once
-#include <boost/filesystem/path.hpp>
 #include <MRN/FileSystem/Tile.h>
+#include <boost/filesystem/path.hpp>
 namespace MRN {
 class SoarscapeOSGB
 {
@@ -8,7 +8,7 @@ public:
     SoarscapeOSGB() = default;
     SoarscapeOSGB(const boost::filesystem::path& path_)
         : m_path(path_)
-        {}
+    {}
     // check data format
     bool check();
     void calculateTileArray();

@@ -1,8 +1,8 @@
 #include "MRN/Mesh/Utils/Simplify.h"
 
-namespace MRN
+namespace MRN {
+void simplify(MyMesh& mesh_, float percent_)
 {
-void simplify(MyMesh& mesh_, float percent_) {
     int                                       FinalSize = mesh_.FN() * percent_;
     vcg::tri::TriEdgeCollapseQuadricParameter qparams;
     qparams.QualityThr       = .3;
@@ -42,4 +42,4 @@ void simplify(MyMesh& mesh_, float percent_) {
     printf("Removed %i duplicate and %i unreferenced vertices from mesh \n", dup, unref);
 }
 
-}
+}   // namespace MRN

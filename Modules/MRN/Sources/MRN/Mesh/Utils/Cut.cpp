@@ -1,7 +1,7 @@
 #include "MRN/Mesh/Utils/Cut.h"
-namespace MRN
+namespace MRN {
+void cut(MyMesh& mesh, const vcg::Box3f& bbox)
 {
-void cut(MyMesh& mesh, const vcg::Box3f& bbox) {
     for (size_t i = 0; i < mesh.face.size(); i++) {
         auto& face = mesh.face[i];
         auto& v0   = face.V(0);
@@ -14,4 +14,4 @@ void cut(MyMesh& mesh, const vcg::Box3f& bbox) {
     vcg::tri::Clean<MyMesh>::RemoveUnreferencedVertex(mesh);
 }
 
-}
+}   // namespace MRN

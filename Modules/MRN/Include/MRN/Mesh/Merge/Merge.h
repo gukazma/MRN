@@ -1,17 +1,16 @@
 #pragma once
 #include <MRN/Mesh/Mesh.h>
 #include <vector>
-namespace MRN
+namespace MRN {
+class Merge
 {
-	class Merge
-	{
-    public:
-        Merge();
+public:
+    Merge();
 
-		void init(std::vector<Mesh> meshs);
+    void init(std::vector<Mesh> meshs);
 
-		void process();
+    void process();
 
-		void getMerged(MyMesh& mesh);
-	};
-}
+    void getMerged(MyMesh& mesh);
+};
+}   // namespace MRN

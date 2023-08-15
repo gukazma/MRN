@@ -1,13 +1,13 @@
+#include <CGAL/IO/Color.h>
 #include <MRN/Mesh/Implement/OSGB/OSGBMeshImpl.h>
-#include <osgDB/ReadFile>
-#include <osgDB/WriteFile>
+#include <fstream>
 #include <osg/NodeVisitor>
 #include <osg/Texture2D>
-#include <CGAL/IO/Color.h>
-#include <vector>
-#include <fstream>
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 #include <unordered_map>
 #include <vcg/complex/algorithms/clean.h>
+#include <vector>
 
 namespace std {
 template<> struct hash<vcg::Point3f>
@@ -19,13 +19,13 @@ template<> struct hash<vcg::Point3f>
     }
 };
 }   // namespace std
-namespace MRN
-{
+namespace MRN {
 class OSGBMeshVisitor : public osg::NodeVisitor
 {
 public:
     OSGBMeshVisitor(MyMesh& mesh_)
-        : m_mesh(mesh_), osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+        : m_mesh(mesh_)
+        , osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
     {}
 
     void apply(osg::Geode& geode) override
@@ -107,7 +107,8 @@ public:
     MyMesh& m_mesh;
 };
 
-void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_) {
+void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_)
+{
     if (!(path_.extension() == ".osgb" || path_.extension() == ".osgt")) {
         MeshImplBase::read(path_);
         return;
@@ -118,41 +119,43 @@ void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_) {
 }
 
 
-size_t findIndex(MyVertex& v_, osg::ref_ptr<osg::Vec3Array> vertices) {
+size_t findIndex(MyVertex& v_, osg::ref_ptr<osg::Vec3Array> vertices)
+{
     for (size_t i = 0; i < vertices->size(); i++) {
         osg::Vec3 v(v_.P()[0], v_.P()[1], v_.P()[2]);
         if (v == vertices->at(i)) return i;
     }
 }
-void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
+void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_)
+{
     vcg::tri::Clean<MyMesh>::RemoveDuplicateVertex(m_nativeMesh);
     if (path_.extension() == ".osgb" || path_.extension() == ".osgt") {
-        osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
-        osg::ref_ptr<osg::Vec4Array> colors   = new osg::Vec4Array();
-        std::unordered_map<vcg::Point3f, int> vimap;
+        osg::ref_ptr<osg::Vec3Array>                   vertices = new osg::Vec3Array;
+        osg::ref_ptr<osg::Vec4Array>                   colors   = new osg::Vec4Array();
+        std::unordered_map<vcg::Point3f, int>          vimap;
         std::unordered_map<vcg::Point3f, vcg::Color4b> vcmap;
-        
+
         osg::ref_ptr<osg::DrawElementsUInt> indices =
             new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES);
         for (size_t i = 0; i < m_nativeMesh.vert.size(); i++) {
             auto& v = m_nativeMesh.vert[i];
 
             if (v.IsD()) continue;
-            auto p = v.P();
+            auto p   = v.P();
             vimap[p] = vertices->size();
             vertices->push_back({p[0], p[1], p[2]});
-            auto c = v.C();
+            auto c   = v.C();
             vcmap[p] = c;
             colors->push_back({c[0] / 255.0f, c[1] / 255.0f, c[2] / 255.0f, c[3] / 255.0f});
         }
-        
+
         for (size_t i = 0; i < m_nativeMesh.face.size(); i++) {
             if (m_nativeMesh.face[i].IsD()) continue;
             indices->push_back(vimap[m_nativeMesh.face[i].V(0)->P()]);
             indices->push_back(vimap[m_nativeMesh.face[i].V(1)->P()]);
             indices->push_back(vimap[m_nativeMesh.face[i].V(2)->P()]);
         }
-        
+
         osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
         geometry->setColorArray(colors.get());
         geometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
@@ -164,4 +167,4 @@ void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_) {
         MeshImplBase::write(path_);
     }
 }
-}
+}   // namespace MRN

@@ -1,14 +1,15 @@
 #include <MRN/Mesh/Implement/MeshImplBase.h>
-#include <fstream>
-#include <boost/thread.hpp>
 #include <boost/range/algorithm.hpp>
-#include <wrap/io_trimesh/export.h>
-#include <wrap/io_trimesh/import.h>
+#include <boost/thread.hpp>
+#include <fstream>
 #include <vcg/complex/algorithms/local_optimization.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
 #include <vcg/space/index/kdtree/kdtree.h>
+#include <wrap/io_trimesh/export.h>
+#include <wrap/io_trimesh/import.h>
 namespace MRN {
-void MeshImplBase::read(const boost::filesystem::path& path_) {
+void MeshImplBase::read(const boost::filesystem::path& path_)
+{
     vcg::tri::io::Importer<MyMesh>::Open(m_nativeMesh, path_.generic_string().c_str());
 }
 void MeshImplBase::write(const boost::filesystem::path& path_)
@@ -19,10 +20,10 @@ void MeshImplBase::simpilify(float percent_)
 {
     int                                       FinalSize = m_nativeMesh.FN() * percent_;
     vcg::tri::TriEdgeCollapseQuadricParameter qparams;
-    qparams.QualityThr  = .3;
-    qparams.PreserveBoundary  = false;
-    double TargetError  = std::numeric_limits<double>::max();
-    bool   CleaningFlag = false;
+    qparams.QualityThr       = .3;
+    qparams.PreserveBoundary = false;
+    double TargetError       = std::numeric_limits<double>::max();
+    bool   CleaningFlag      = false;
 
     vcg::tri::UpdateBounding<MyMesh>::Box(m_nativeMesh);
 
@@ -65,8 +66,8 @@ MyVertex MeshImplBase::getClosest(vcg::Point3f point)
         m_nativeMesh.vert.size(),
         size_t(m_nativeMesh.vert[1].P().V()) - size_t(m_nativeMesh.vert[0].P().V()));
     vcg::KdTree<MyMesh::ScalarType> kdTreeVcg(wrapperVcg);
-    unsigned int                             index = 0;
-    float                                    minidistance;
+    unsigned int                    index = 0;
+    float                           minidistance;
     kdTreeVcg.doQueryClosest(point, index, minidistance);
     return m_nativeMesh.vert[index];
 }
@@ -74,4 +75,4 @@ MyMesh& MeshImplBase::getNativeMesh()
 {
     return m_nativeMesh;
 }
-}
+}   // namespace MRN
