@@ -42,6 +42,19 @@ void SoarscapeOSGB::merge() {
     merge.init(meshs);
     merge.process();
     merge.getMerged(mergeMesh);
+    for (size_t level = 0; level < m_tileArray.size(); level++) {
+        std::cout << "level ====================== " << level << std::endl;
+        const auto& tileArray = m_tileArray[level];
+        std::vector<MRN::Mesh> meshs;
+        for (size_t x = 0; x < tileArray.size(); x++) {
+            const auto& tileVector = tileArray[x];
+            for (size_t y = 0; y < tileVector.size(); y++) {
+                const auto& tile = tileVector[y];
+                if (!tile.has_value()) continue;
+                std::cout << "tile path: " << tile.value().tilePath << std::endl;
+            }
+        }
+    }
 }
 void SoarscapeOSGB::cutCake() {}
 void SoarscapeOSGB::writeTile() {}
