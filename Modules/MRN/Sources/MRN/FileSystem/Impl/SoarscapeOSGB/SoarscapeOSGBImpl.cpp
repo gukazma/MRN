@@ -168,6 +168,6 @@ std::string SoarscapeOSGBImpl::tile_intToString(int tileNumber, int n) {
 
 // »ñÈ¡osgbÍß¿éµÄbbox
 vcg::Box3<float> SoarscapeOSGBImpl::getOsgbBox(boost::filesystem::path tilePath) {
-    MRN::Mesh(tilePath);
+    return vcg::Box3<float>();
 }
 }

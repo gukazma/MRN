@@ -100,6 +100,7 @@ public:
             }
         }
         vcg::tri::UpdateTopology<MyMesh>::VertexFace(m_mesh);
+        vcg::tri::UpdateBounding<MyMesh>::Box(m_mesh);
         vcg::tri::UpdateFlags<MyMesh>::FaceBorderFromVF(m_mesh);
         vcg::tri::UpdateFlags<MyMesh>::VertexBorderFromFaceBorder(m_mesh);
     }
