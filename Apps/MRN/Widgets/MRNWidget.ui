@@ -54,6 +54,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Scan</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushButton_begin">
        <property name="text">
         <string>Begin</string>
