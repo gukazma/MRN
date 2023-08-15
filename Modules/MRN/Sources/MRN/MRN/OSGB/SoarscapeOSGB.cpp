@@ -2,9 +2,11 @@
 #include <MRN/FileSystem/FileSystem.h>
 #include <MRN/Mesh/Mesh.h>
 #include <MRN/Mesh/Merge/Merge.h>
+#include <MRN/Mesh/Utils/Simplify.h>
+#include <MRN/Mesh/Utils/Cut.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-
+#include <wrap/io_trimesh/export_ply.h>
 namespace fs = boost::filesystem;
 namespace MRN
 {
@@ -43,15 +45,28 @@ void SoarscapeOSGB::merge() {
     merge.process();
     merge.getMerged(mergeMesh);
     for (size_t level = 0; level < m_tileArray.size(); level++) {
+        MyMesh levelMesh;
+        std::cout << "Get level mesh......" << std::endl;
+        vcg::tri::Append<MyMesh, MyMesh>::MeshCopyConst(levelMesh, mergeMesh);
+        float simplifyPercent = 1.0f / std::pow(2, level + 1);
+        std::cout << "Simplify level mesh with simplify percent: " << simplifyPercent << std::endl;
+        MRN::simplify(levelMesh, simplifyPercent);
         std::cout << "level ====================== " << level << std::endl;
         const auto& tileArray = m_tileArray[level];
         std::vector<MRN::Mesh> meshs;
         for (size_t x = 0; x < tileArray.size(); x++) {
             const auto& tileVector = tileArray[x];
             for (size_t y = 0; y < tileVector.size(); y++) {
-                const auto& tile = tileVector[y];
-                if (!tile.has_value()) continue;
-                std::cout << "tile path: " << tile.value().tilePath << std::endl;
+                if (!tileVector[y].has_value()) continue;
+                const auto& tile = tileVector[y].value();
+                MyMesh tileMesh;
+                vcg::tri::Append<MyMesh, MyMesh>::MeshCopyConst(tileMesh, levelMesh);
+                MRN::cut(tileMesh, tile.box);
+                boost::filesystem::path savePath = tile.tilePath.parent_path()/ tile.tilePath.stem();
+                savePath += ".ply";
+                std::cout << "tile path: " << tile.tilePath << std::endl;
+                std::cout << "savePath: " << savePath << std::endl;
+                vcg::tri::io::ExporterPLY<MyMesh>::Save(tileMesh, savePath.generic_string().c_str(), vcg::tri::io::Mask::IOM_VERTCOLOR);
             }
         }
     }
