@@ -15,7 +15,7 @@ bool SoarscapeOSGB::check()
 {
     for (const auto& dir : fs::directory_iterator(m_path)) {
         if (!fs::is_directory(dir)) continue;
-        if (!boost::algorithm::contains(dir.path().filename().string(), "Tile_+")) continue;
+        if (!boost::algorithm::contains(dir.path().filename().string(), "Tile_")) continue;
         std::vector<std::string> tokens;
         const std::string        sep = "+";
         boost::split(tokens, dir.path().filename().string(), boost::is_any_of(sep));
@@ -33,7 +33,7 @@ void SoarscapeOSGB::merge()
     std::vector<MRN::Mesh> meshs;
     for (const auto& dir : fs::directory_iterator(m_path)) {
         if (!fs::is_directory(dir)) continue;
-        if (!boost::algorithm::contains(dir.path().filename().string(), "Tile_+")) continue;
+        if (!boost::algorithm::contains(dir.path().filename().string(), "Tile_")) continue;
         // std::cout << "Path: " << dir << std::endl;
         for (const auto& file : fs::directory_iterator(dir.path())) {
             if (boost::algorithm::contains(file.path().filename().string(), "_0.osgb")) {
@@ -89,7 +89,7 @@ void SoarscapeOSGB::writeTile() {
                     tilePath.substr(0, tilePath.find(".osgb")) + ".ply";
                 Mesh        mesh(meshPath);
                 mesh.write(tileVector[y].get());
-                boost::filesystem::remove(meshPath);
+                //boost::filesystem::remove(meshPath);
                 std::cout << "add tile path: " << tilePath << std::endl;
                 std::cout << "remove mesh Path: " << meshPath << std::endl;
             }

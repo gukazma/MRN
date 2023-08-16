@@ -21,7 +21,7 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
     std::vector<boost::filesystem::directory_entry> tileDir;
     for (const auto& dir : fs::directory_iterator(m_dir)) {
         if (!fs::is_directory(dir)) continue;
-        if (!boost::algorithm::contains(dir.path().filename().string(), "Tile_+")) continue;
+        if (!boost::algorithm::contains(dir.path().filename().string(), "Tile_")) continue;
         tileDir.push_back(dir);
         // std::cout << "Path: " << dir << std::endl;
     }
@@ -64,10 +64,10 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
                 std::string xNumString = tile_intToString(tileNumberX, 3);
                 if (fileName.find(xNumString + "_+") != -1)
                     tileNumberY =
-                        atoi(fileName.substr(fileName.find(xNumString + "_+") + 5, 3).c_str());
+                        atoi(fileName.substr(fileName.find(xNumString + "_+") + 6, 3).c_str());
                 else
                     tileNumberY =
-                        -atoi(fileName.substr(fileName.find(xNumString + "_-") + 5, 3).c_str());
+                        -atoi(fileName.substr(fileName.find(xNumString + "_-") + 6, 3).c_str());
 
                 tileCoord tc(tileNumberX, tileNumberY);
                 if (minTile->x > tc.x) minTile->x = tc.x;
@@ -134,17 +134,20 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
                     t.firstTile = true;
                 }
                 else {
-                    t.parentPaths.push_back(tileArray[l - 1][t_x][t_y].get());
-                    updateBbox(tempBox, tileArray[l - 1][t_x][t_y].get().box);
-                    if (t_y + 1 < maxTile->y) {
+                    if (tileArray[l - 1][t_x][t_y].has_value()) {
+                        t.parentPaths.push_back(tileArray[l - 1][t_x][t_y].get());
+                        updateBbox(tempBox, tileArray[l - 1][t_x][t_y].get().box);
+                    }
+                    if (t_y + 1 < maxTile->y && tileArray[l - 1][t_x][t_y + 1].has_value()) {
                         t.parentPaths.push_back(tileArray[l - 1][t_x][t_y + 1].get());
                         updateBbox(tempBox, tileArray[l - 1][t_x][t_y + 1].get().box);
                     }
-                    if (t_x + 1 < maxTile->x) {
+                    if (t_x + 1 < maxTile->x && tileArray[l - 1][t_x + 1][t_y].has_value()) {
                         t.parentPaths.push_back(tileArray[l - 1][t_x + 1][t_y].get());
                         updateBbox(tempBox, tileArray[l - 1][t_x + 1][t_y].get().box);
                     }
-                    if (t_x + 1 < maxTile->x && t_y + 1 < maxTile->y) {
+                    if (t_x + 1 < maxTile->x && t_y + 1 < maxTile->y &&
+                        tileArray[l - 1][t_x + 1][t_y + 1].has_value()) {
                         t.parentPaths.push_back(tileArray[l - 1][t_x + 1][t_y + 1].get());
                         updateBbox(tempBox, tileArray[l - 1][t_x + 1][t_y + 1].get().box);
                     }
@@ -164,7 +167,7 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
                     t.threshold             = threshold;
                     t.level                 = minLevel;
                     std::string rootDir     = "RootTiles_L" + std::to_string(minLevel);
-                    std::string newTileName = "Tile_+" + tile_intToString(tax, 4) + "_+" +
+                    std::string newTileName = "Tile_+" + tile_intToString(tax   , 4) + "_+" +
                                               tile_intToString(tay, 4) + "_L" +
                                               std::to_string(minLevel) + ".osgb";
                     fs::path tempPath = RootDataPath / rootDir;
@@ -193,10 +196,17 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
 // 瓦块坐标转化为字符串 eg：1 -> 001
 std::string SoarscapeOSGBImpl::tile_intToString(int tileNumber, int n)
 {
+    bool addNegative = false;
+    if (tileNumber < 0) {
+        tileNumber = -tileNumber;
+        addNegative = true;
+    }
+
     std::string sTile = std::to_string(tileNumber);
     while (sTile.length() < n) {
         sTile = "0" + sTile;
     }
+    if (addNegative) sTile = "-" + sTile;
     return sTile;
 }
 
