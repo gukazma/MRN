@@ -34,6 +34,15 @@ MyVertex Mesh::getClosest(vcg::Point3f point)
     return m_meshImplement->getClosest(point);
 }
 
+Mesh::~Mesh()
+{
+    m_meshImplement.reset();
+}
+
+Mesh::Mesh() {
+    m_meshImplement = std::make_shared<MeshImplBase>();
+}
+
 
 MyMesh& Mesh::getNativMesh()
 {

@@ -44,25 +44,23 @@ void SoarscapeOSGB::merge()
     MyMesh     mergeMesh;
     MRN::Merge merge;
     merge.init(meshs);
+    meshs.resize(0);
     merge.process();
     merge.getMerged(mergeMesh);
     for (size_t level = 0; level < m_tileArray.size(); level++) {
-        MyMesh levelMesh;
         std::cout << "Get level mesh......" << std::endl;
-        vcg::tri::Append<MyMesh, MyMesh>::MeshCopyConst(levelMesh, mergeMesh);
-        float simplifyPercent = 1.0f / std::pow(2, level + 1);
-        std::cout << "Simplify level mesh with simplify percent: " << simplifyPercent << std::endl;
-        MRN::simplify(levelMesh, simplifyPercent);
+        MRN::simplify(mergeMesh, 0.5);
+        vcg::tri::Clean<MyMesh>::RemoveUnreferencedVertex(mergeMesh);
+        vcg::tri::Allocator<MyMesh>::CompactEveryVector(mergeMesh);
         std::cout << "level ====================== " << level << std::endl;
         const auto&            tileArray = m_tileArray[level];
-        std::vector<MRN::Mesh> meshs;
         for (size_t x = 0; x < tileArray.size(); x++) {
             const auto& tileVector = tileArray[x];
             for (size_t y = 0; y < tileVector.size(); y++) {
                 if (!tileVector[y].has_value()) continue;
                 const auto& tile = tileVector[y].value();
                 MyMesh      tileMesh;
-                vcg::tri::Append<MyMesh, MyMesh>::MeshCopyConst(tileMesh, levelMesh);
+                vcg::tri::Append<MyMesh, MyMesh>::MeshCopyConst(tileMesh, mergeMesh);
                 MRN::cut(tileMesh, tile.box);
                 boost::filesystem::path savePath =
                     tile.tilePath.parent_path() / tile.tilePath.stem();

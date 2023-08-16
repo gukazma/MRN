@@ -19,7 +19,8 @@ public:
     void     write(const Tile& tile, DataType type = OSGB);
     void       simpilify(float percent_);
     MyVertex getClosest(vcg::Point3f point);
-
+    ~Mesh();
+    Mesh();
     MyMesh& getNativMesh();
 
 private:
