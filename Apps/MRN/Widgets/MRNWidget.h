@@ -17,6 +17,7 @@ public:
 
 private slots:
     void slot_scan(bool);
+    void slot_openFolder(bool);
 
 private:
     Ui::MRNWidget* ui;
