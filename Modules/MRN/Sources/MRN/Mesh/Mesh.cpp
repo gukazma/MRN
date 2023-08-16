@@ -11,9 +11,17 @@ Mesh::Mesh(const boost::filesystem::path& path_, DataType type)
     m_meshImplement->read(path_);
 }
 
-void Mesh::write(const boost::filesystem::path& path_)
-{
+void Mesh::write(const boost::filesystem::path& path_) {
     m_meshImplement->write(path_);
+}
+
+void Mesh::write(const Tile& tile, DataType type)
+{
+    switch (type) {
+    case MRN::Mesh::OSGB: m_meshImplement->write(tile); break;
+    case MRN::Mesh::GLTF: break;
+    default: break;
+    }
 }
 
 void Mesh::simpilify(float percent_)

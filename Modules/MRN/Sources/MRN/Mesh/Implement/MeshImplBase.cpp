@@ -1,4 +1,7 @@
 #include <MRN/Mesh/Implement/MeshImplBase.h>
+#include <MRN/Mesh/Implement/OSGB/OSGBMeshImpl.h>
+#include <fstream>
+#include <boost/thread.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/thread.hpp>
 #include <fstream>
@@ -15,6 +18,9 @@ void MeshImplBase::read(const boost::filesystem::path& path_)
 void MeshImplBase::write(const boost::filesystem::path& path_)
 {
     vcg::tri::io::Exporter<MyMesh>::Save(m_nativeMesh, path_.generic_string().c_str());
+}
+void MeshImplBase::write(const Tile& tile) {
+    return;
 }
 void MeshImplBase::simpilify(float percent_)
 {

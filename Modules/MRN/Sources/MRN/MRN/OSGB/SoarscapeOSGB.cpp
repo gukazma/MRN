@@ -74,5 +74,25 @@ void SoarscapeOSGB::merge()
     }
 }
 void SoarscapeOSGB::cutCake() {}
-void SoarscapeOSGB::writeTile() {}
+void SoarscapeOSGB::writeTile() {
+    for (size_t level = 0; level < m_tileArray.size(); level++) {
+        std::cout << "writeTile ====================== " << level << std::endl;
+        const auto&            tileArray = m_tileArray[level];
+        for (size_t x = 0; x < tileArray.size(); x++) {
+            const auto& tileVector = tileArray[x];
+            for (size_t y = 0; y < tileVector.size(); y++) {
+                std::string tilePath = tileVector[y]->tilePath.generic_string();
+                boost::filesystem::path meshPath =
+                    tilePath.substr(0, tilePath.find(".osgb")) + ".ply";
+                Mesh        mesh(meshPath);
+                mesh.write(tileVector[y].get());
+                boost::filesystem::remove(meshPath);
+                std::cout << "add tile path: " << tilePath << std::endl;
+                std::cout << "remove mesh Path: " << meshPath << std::endl;
+            }
+        }
+
+
+    }
+}
 }   // namespace MRN
