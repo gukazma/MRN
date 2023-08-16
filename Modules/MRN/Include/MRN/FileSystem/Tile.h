@@ -11,6 +11,7 @@ struct Tile
     double                  threshold;
     float                   simplifyLevel = 1.0f;
     vcg::Box3<float>        box;
+    bool                    firstTile = false;
 };
 class TileArray : public std::vector<std::vector<std::vector<boost::optional<Tile>>>>
 {

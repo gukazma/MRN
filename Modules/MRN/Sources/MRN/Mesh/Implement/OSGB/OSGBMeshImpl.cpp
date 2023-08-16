@@ -4,6 +4,11 @@
 #include <osg/NodeVisitor>
 #include <osg/Texture2D>
 #include <osg/PagedLOD>
+#include <osg/Geode>
+#include <osg/Geometry>
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
+#include <osg/LOD>
 #include <CGAL/IO/Color.h>
 #include <vector>
 #include <fstream>
@@ -169,19 +174,11 @@ void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_)
         MeshImplBase::write(path_);
     }
 }
-void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_, Tile& tile) {
+void OSGBMeshImpleMesh::write(const Tile& tile)
+{
     vcg::tri::Clean<MyMesh>::RemoveDuplicateVertex(m_nativeMesh);
-    if (path_.extension() == ".osgb" || path_.extension() == ".osgt") {
-        osg::ref_ptr<osg::PagedLOD>                    pagedLod = new osg::PagedLOD();
-        // 设置osgb的相关参数
-        osg::Vec3f       bboxMin(tile.box.min.X(), tile.box.min.Y(), tile.box.min.Z());
-        osg::Vec3f       bboxMax(tile.box.max.X(), tile.box.max.Y(), tile.box.max.Z());
-        osg::BoundingBox bbox(bboxMin, bboxMax);
-        osg::BoundingSphere sphere(bbox);
-        double radius = std::sqrt((bbox.xMax() - bbox.xMin()) * (bbox.xMax() - bbox.xMin()) +
-                                  (bbox.yMax() - bbox.yMin()) * (bbox.yMax() - bbox.yMin()) +
-                                  (bbox.zMax() - bbox.zMin()) * (bbox.zMax() - bbox.zMin()));
-        double threshold = 2.0 * radius / std::pow(2.0, 16 - tile.level);
+    auto path = tile.tilePath;
+    if (path.extension() == ".osgb" || path.extension() == ".osgt") {
         osg::ref_ptr<osg::Vec3Array>                   vertices = new osg::Vec3Array;
         osg::ref_ptr<osg::Vec4Array>                   colors   = new osg::Vec4Array();
         std::unordered_map<vcg::Point3f, int>          vimap;
@@ -213,10 +210,34 @@ void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_, Tile& tile) 
         geometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
         geometry->setVertexArray(vertices);
         geometry->addPrimitiveSet(indices);
-        osgDB::writeNodeFile(*geometry, path_.generic_string());
+        osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+        geode->addDrawable(geometry.get());
+
+        osg::ref_ptr<osg::PagedLOD> pagedLod = new osg::PagedLOD();
+        // 提取bbox与Sphere
+        osg::Vec3f          bboxMin(tile.box.min.X(), tile.box.min.Y(), tile.box.min.Z());
+        osg::Vec3f          bboxMax(tile.box.max.X(), tile.box.max.Y(), tile.box.max.Z());
+        osg::BoundingBox    bbox(bboxMin, bboxMax);
+        osg::BoundingSphere sphere(bbox);
+        pagedLod->setRangeMode(osg::LOD::PIXEL_SIZE_ON_SCREEN);
+        pagedLod->setCenterMode(osg::LOD::USER_DEFINED_CENTER);
+        pagedLod->setCenter(sphere.center());
+        pagedLod->setRadius(sphere.radius());
+        pagedLod->addChild(geode.get(), 0, tile.threshold, "");
+        pagedLod->setDatabasePath("");
+        for (int i = 0; i < tile.parentPaths.size(); i++) {
+            std::string flag = tile.firstTile ? "../../MRN/" : "../";
+            std::string parentFileName =
+                flag + tile.parentPaths[i].tilePath.parent_path().filename().generic_string() +
+                "/" + tile.parentPaths[i].tilePath.filename().generic_string();
+            pagedLod->setFileName(i + 1, parentFileName);
+            pagedLod->setRange(i + 1, tile.threshold, 1e30);
+        }
+
+        osgDB::writeNodeFile(*(pagedLod.get()), path.generic_string());
     }
     else {
-        MeshImplBase::write(path_);
+        MeshImplBase::write(path);
     }
 }
 }

@@ -8,6 +8,6 @@ namespace MRN
     public:
         virtual void read(const boost::filesystem::path& path_) override;
         virtual void write(const boost::filesystem::path& path_) override;
-        virtual void write(const boost::filesystem::path& path_, Tile& tile);
+        virtual void write(const Tile& tile) override;
 	};
 }

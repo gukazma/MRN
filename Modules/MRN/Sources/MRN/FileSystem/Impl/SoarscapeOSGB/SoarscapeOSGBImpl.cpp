@@ -123,6 +123,7 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
                         updateBbox(tempBox, temp.box);
                         t.parentPaths.push_back(temp);
                     }
+                    t.firstTile = true;
                 }
                 else {
                     t.parentPaths.push_back(tileArray[l - 1][t_x][t_y].get());
@@ -146,7 +147,13 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
                     temp_x.push_back(t_null);
                 }
                 else {
+                    double radius = std::sqrt(
+                        (tempBox.max.X() - tempBox.min.X()) * (tempBox.max.X() - tempBox.min.X()) +
+                        (tempBox.max.Y() - tempBox.min.Y()) * (tempBox.max.Y() - tempBox.min.Y()) +
+                        (tempBox.max.Z() - tempBox.min.Z()) * (tempBox.max.Z() - tempBox.min.Z()));
+                    double threshold = 2.0 * radius / std::pow(2.0, 16 - minLevel);
                     t.box                   = tempBox;
+                    t.threshold             = threshold;
                     t.level                 = minLevel;
                     std::string rootDir     = "RootTiles_L" + std::to_string(minLevel);
                     std::string newTileName = "Tile_+" + tile_intToString(tax, 4) + "_+" +

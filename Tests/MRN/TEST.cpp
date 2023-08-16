@@ -12,4 +12,5 @@ TEST(MRN, MRN)
 
     mrn.calculateTileArray();
     mrn.merge();
+    mrn.writeTile();
 }

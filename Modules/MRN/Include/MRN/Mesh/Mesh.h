@@ -16,7 +16,7 @@ public:
     };
     explicit Mesh(const boost::filesystem::path& path_, DataType type = OSGB);
     void write(const boost::filesystem::path& path_);
-    void     write(const Tile& tile);
+    void     write(const Tile& tile, DataType type = OSGB);
     void       simpilify(float percent_);
     MyVertex getClosest(vcg::Point3f point);
 
