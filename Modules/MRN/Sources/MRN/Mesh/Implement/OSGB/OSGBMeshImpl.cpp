@@ -213,28 +213,30 @@ void OSGBMeshImpleMesh::write(const Tile& tile)
         osg::ref_ptr<osg::Geode> geode = new osg::Geode;
         geode->addDrawable(geometry.get());
 
-        osg::ref_ptr<osg::PagedLOD> pagedLod = new osg::PagedLOD();
+        osg::ref_ptr<osg::Group>    group    = new osg::Group;
         // ÌáÈ¡bboxÓëSphere
         osg::Vec3f          bboxMin(tile.box.min.X(), tile.box.min.Y(), tile.box.min.Z());
         osg::Vec3f          bboxMax(tile.box.max.X(), tile.box.max.Y(), tile.box.max.Z());
         osg::BoundingBox    bbox(bboxMin, bboxMax);
         osg::BoundingSphere sphere(bbox);
-        pagedLod->setRangeMode(osg::LOD::PIXEL_SIZE_ON_SCREEN);
-        pagedLod->setCenterMode(osg::LOD::USER_DEFINED_CENTER);
-        pagedLod->setCenter(sphere.center());
-        pagedLod->setRadius(sphere.radius());
-        pagedLod->addChild(geode.get(), 0, tile.threshold, "");
-        pagedLod->setDatabasePath("");
         for (int i = 0; i < tile.parentPaths.size(); i++) {
+            osg::ref_ptr<osg::PagedLOD> pagedLod = new osg::PagedLOD();
+            pagedLod->setRangeMode(osg::LOD::PIXEL_SIZE_ON_SCREEN);
+            pagedLod->setCenterMode(osg::LOD::USER_DEFINED_CENTER);
+            pagedLod->setCenter(sphere.center());
+            pagedLod->setRadius(sphere.radius());
+            pagedLod->addChild(geode.get(), 0, tile.threshold, "");
+            pagedLod->setDatabasePath("");
             std::string flag = tile.firstTile ? "../../MRN/" : "../";
             std::string parentFileName =
                 flag + tile.parentPaths[i].tilePath.parent_path().filename().generic_string() +
                 "/" + tile.parentPaths[i].tilePath.filename().generic_string();
-            pagedLod->setFileName(i + 1, parentFileName);
-            pagedLod->setRange(i + 1, tile.threshold, 1e30);
+            pagedLod->setFileName(1, parentFileName);
+            pagedLod->setRange(1, tile.threshold, 1e30);
+            group->addChild(pagedLod.get());
         }
 
-        osgDB::writeNodeFile(*(pagedLod.get()), path.generic_string());
+        osgDB::writeNodeFile(*(group.get()), path.generic_string());
     }
     else {
         MeshImplBase::write(path);

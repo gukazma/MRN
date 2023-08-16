@@ -55,11 +55,19 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
         for (const auto& file : fs::directory_iterator(dir)) {
             std::string fileName = file.path().filename().string();
             if (boost::algorithm::contains(fileName, minLevelName)) {
+                int tileNumberX, tileNumberY;
+                if (fileName.find("Tile_+") != -1)
+                    tileNumberX = atoi(fileName.substr(fileName.find("Tile_+") + 6, 3).c_str());
+                else
+                    tileNumberX = -atoi(fileName.substr(fileName.find("Tile_-") + 6, 3).c_str());
 
-                int tileNumberX = atoi(fileName.substr(fileName.find("Tile_+") + 6, 3).c_str());
-                int tileNumberY = atoi(
-                    fileName.substr(fileName.find(tile_intToString(tileNumberX, 3) + "_+") + 5, 3)
-                        .c_str());
+                std::string xNumString = tile_intToString(tileNumberX, 3);
+                if (fileName.find(xNumString + "_+") != -1)
+                    tileNumberY =
+                        atoi(fileName.substr(fileName.find(xNumString + "_+") + 5, 3).c_str());
+                else
+                    tileNumberY =
+                        -atoi(fileName.substr(fileName.find(xNumString + "_-") + 5, 3).c_str());
 
                 tileCoord tc(tileNumberX, tileNumberY);
                 if (minTile->x > tc.x) minTile->x = tc.x;
