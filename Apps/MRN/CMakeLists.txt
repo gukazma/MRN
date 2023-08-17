@@ -17,11 +17,13 @@ find_package(Qt5 COMPONENTS
 file(GLOB_RECURSE CPP_HEAD_FILES "*.h")
 file(GLOB_RECURSE CPP_SOUCE_FILES  "*.cpp")
 file(GLOB_RECURSE UI_FILES "*.ui")
+set(QRC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Resources/resources.qrc)
+set(APPRC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Resources/appicon.rc)
+set(Translatefile ${CMAKE_CURRENT_SOURCE_DIR}/Resources/Translations/zh_CN.ts)
 
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${CPP_HEAD_FILES} ${CPP_SOUCE_FILES} ${UI_FILES} ${Translatefile})
 
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${CPP_HEAD_FILES} ${CPP_SOUCE_FILES} ${UI_FILES})
-
-add_executable(${TARGET_NAME} ${CPP_HEAD_FILES} ${CPP_SOUCE_FILES} ${UI_FILES})
+add_executable(${TARGET_NAME} ${CPP_HEAD_FILES} ${CPP_SOUCE_FILES} ${UI_FILES} ${QRC_FILE} ${APPRC_FILE} ${Translatefile})
 
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17 OUTPUT_NAME ${TARGET_NAME})
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER Apps)
@@ -42,3 +44,19 @@ target_include_directories(
   PUBLIC 
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
 )
+
+find_program(LUPDATE_EXE lupdate)
+add_custom_target(
+      MRNTranslateUpdate
+      COMMAND ${LUPDATE_EXE} -recursive ./Widgets/ -ts ./Resources/Translations/zh_CN.ts
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      VERBATIM)
+
+find_program(LRELEASE_EXE lrelease)
+add_custom_target(
+      MRNTranslateRelease
+      COMMAND ${LRELEASE_EXE} ./Resources/Translations/zh_CN.ts
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      VERBATIM)
+set_target_properties(MRNTranslateUpdate PROPERTIES FOLDER Apps)
+set_target_properties(MRNTranslateRelease PROPERTIES FOLDER Apps)
