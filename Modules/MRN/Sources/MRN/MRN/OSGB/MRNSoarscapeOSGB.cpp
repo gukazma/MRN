@@ -9,6 +9,7 @@
 #include <wrap/io_trimesh/export_ply.h>
 #include <osg/PagedLOD>
 #include <osgDB/WriteFile>
+#include <tbb/tbb.h>
 namespace fs = boost::filesystem;
 namespace MRN {
 bool MRNSoarscapeOSGB::check()
@@ -42,22 +43,26 @@ void MRNSoarscapeOSGB::merge()
         vcg::tri::Clean<MyMesh>::RemoveUnreferencedVertex(mergeMesh);
         std::cout << "level ====================== " << level << std::endl;
         const auto&            tileArray = m_tileArray[level];
-        for (size_t x = 0; x < tileArray.size(); x++) {
-            const auto& tileVector = tileArray[x];
-            for (size_t y = 0; y < tileVector.size(); y++) {
-                if (!tileVector[y].has_value()) continue;
-                const auto& tile = tileVector[y].value();
-                MyMesh      cutmesh;
-                MRN::cut(cutmesh,mergeMesh , tile.box);
-                boost::filesystem::path savePath =
-                    tile.tilePath.parent_path() / tile.tilePath.stem();
-                savePath += ".ply";
-                vcg::tri::io::ExporterPLY<MyMesh>::Save(
-                    cutmesh,
-                                                        savePath.generic_string().c_str(),
-                                                        vcg::tri::io::Mask::IOM_VERTCOLOR);
-            }
-        }
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, tileArray.size()),
+                          [&](const tbb::blocked_range<size_t>& r) {
+                              for (size_t x = r.begin(); x != r.end(); x++) {
+                                  const auto& tileVector = tileArray[x];
+                                  for (size_t y = 0; y < tileVector.size(); y++) {
+                                      if (!tileVector[y].has_value()) continue;
+                                      const auto& tile = tileVector[y].value();
+                                      MyMesh      cutmesh;
+                                      MRN::cut(cutmesh, mergeMesh, tile.box);
+                                      boost::filesystem::path savePath =
+                                          tile.tilePath.parent_path() / tile.tilePath.stem();
+                                      savePath += ".ply";
+                                      vcg::tri::io::ExporterPLY<MyMesh>::Save(
+                                          cutmesh,
+                                          savePath.generic_string().c_str(),
+                                          vcg::tri::io::Mask::IOM_VERTCOLOR);
+                                  }
+                              }
+            });
+        
     }
 }
 void MRNSoarscapeOSGB::writeTile() {

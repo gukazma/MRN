@@ -29,6 +29,9 @@ Boost::dynamic_linking
 Boost::thread
 CGAL::CGAL
 Eigen3::Eigen
+TBB::tbb
+TBB::tbbmalloc
+TBB::tbbmalloc_proxy
 ${OPENSCENEGRAPH_LIBRARIES}
 )
 

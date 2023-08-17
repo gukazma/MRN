@@ -36,7 +36,7 @@ find_package(CGAL REQUIRED HINTS "D:/ThirdParty/CGAL-5.5.2")
 find_package(OpenSceneGraph 2.0.0 REQUIRED osgViewer osgDB osgUtil osgQt5 osgGA)
 find_package(VCG REQUIRED)
 find_package(Eigen3 REQUIRED HINTS "D:/ThirdParty/Eigen3")
-
+find_package(TBB REQUIRED HINTS "D:/ThirdParty/TBB")
 add_subdirectory(Modules)
 add_subdirectory(Apps)
 add_subdirectory(Tests)
