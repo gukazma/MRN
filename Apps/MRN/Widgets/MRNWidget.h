@@ -2,6 +2,7 @@
 #define MRNWIDGET_H
 
 #include <QWidget>
+#include <QString>
 #include <memory>
 namespace MRN
 {
@@ -20,9 +21,13 @@ public:
     explicit MRNWidget(QWidget* parent = nullptr);
     ~MRNWidget();
 
+Q_SIGNALS:
+    void signal_setProgress(int, QString);
 private slots:
     void slot_scan(bool);
     void slot_openFolder(bool);
+    void slot_begin(bool);
+    void slot_setProgress(int, QString);
 
 private:
     Ui::MRNWidget* ui;
