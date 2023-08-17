@@ -1,3 +1,3 @@
 #pragma once
 
-int meshReconstruction(int argc, const char* argv[], const char* output);
+int meshReconstruction(int v_size, const char* mergePath, const char* plycutPath);

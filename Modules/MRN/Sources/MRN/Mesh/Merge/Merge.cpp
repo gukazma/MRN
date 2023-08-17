@@ -37,41 +37,11 @@ void Merge::init()
 void Merge::process()
 {
     std::string                output = m_plymcout.generic_path().string();
-    std::array<const char*, 3> args   = {
-        " ",
-        "-V8",
-        m_mergePath.generic_string().c_str()
-    };
+    
     MyMesh                     plycut;
     std::string plycutpath = (m_path.parent_path() / "merge/plymcout").generic_path().string();
     vcg::tri::io::ExporterPLY<MyMesh>::Save(plycut, output.c_str());
-    meshReconstruction(3, args.data(), plycutpath.c_str());
-    MyMesh mergemesh;
-    vcg::tri::io::ImporterPLY<MyMesh>::Open(mergemesh, m_mergePath.generic_path().string().c_str());
-    std::cout << "===================================================" << std::endl;
-    std::cout << "Generate mesh color" << std::endl;
-    // Construction of the kdTree
-    vcg::ConstDataWrapper<MyMesh::VertexType::CoordType> wrapperVcg(
-        &mergemesh.vert[0].P(),
-        mergemesh.vert.size(),
-        size_t(mergemesh.vert[1].P().V()) - size_t(mergemesh.vert[0].P().V()));
-    vcg::KdTree<MyMesh::ScalarType> kdTreeVcg(wrapperVcg);
-
-
-    MyMesh mesh;
-    vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh, m_plymcout.generic_path().string().c_str());
-    for (size_t i = 0; i < mesh.vert.size(); i++) {
-        auto&        v     = mesh.vert[i];
-        unsigned int index = 0;
-        float        minidistance;
-        kdTreeVcg.doQueryClosest(v.P(), index, minidistance);
-
-        auto& closestV = mergemesh.vert[index];
-        v.C()          = closestV.C();
-    }
-    vcg::tri::io::ExporterPLY<MyMesh>::Save(
-        mesh, m_plymcout.generic_path().string().c_str(), vcg::tri::io::Mask::IOM_VERTCOLOR);
-    boost::filesystem::remove(m_mergePath.generic_path().string().c_str());
+    meshReconstruction(8, m_mergePath.generic_string().c_str(), plycutpath.c_str());
 }
 void Merge::getMerged(MyMesh& mesh)
 {

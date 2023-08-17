@@ -30,6 +30,7 @@ void MRNSoarscapeOSGB::calculateTileArray()
 }
 void MRNSoarscapeOSGB::merge()
 {
+    std::cout << "Begin merge mesh .......... " << std::endl;
     MyMesh     mergeMesh;
     MRN::Merge merge(m_path);
     merge.init();
@@ -39,7 +40,6 @@ void MRNSoarscapeOSGB::merge()
         std::cout << "Get level mesh......" << std::endl;
         MRN::simplify(mergeMesh, 0.5);
         vcg::tri::Clean<MyMesh>::RemoveUnreferencedVertex(mergeMesh);
-        vcg::tri::Allocator<MyMesh>::CompactEveryVector(mergeMesh);
         std::cout << "level ====================== " << level << std::endl;
         const auto&            tileArray = m_tileArray[level];
         for (size_t x = 0; x < tileArray.size(); x++) {
