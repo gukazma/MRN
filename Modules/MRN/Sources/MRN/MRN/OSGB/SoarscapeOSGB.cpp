@@ -87,7 +87,7 @@ void SoarscapeOSGB::writeTile() {
                     tilePath.substr(0, tilePath.find(".osgb")) + ".ply";
                 Mesh        mesh(meshPath);
                 mesh.write(tileVector[y].get());
-                //boost::filesystem::remove(meshPath);
+                boost::filesystem::remove(meshPath);
                 std::cout << "add tile path: " << tilePath << std::endl;
                 std::cout << "remove mesh Path: " << meshPath << std::endl;
             }
