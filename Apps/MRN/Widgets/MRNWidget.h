@@ -2,6 +2,11 @@
 #define MRNWIDGET_H
 
 #include <QWidget>
+#include <memory>
+namespace MRN
+{
+class MRN;
+}
 
 namespace Ui {
 class MRNWidget;
@@ -21,6 +26,7 @@ private slots:
 
 private:
     Ui::MRNWidget* ui;
+    std::shared_ptr<MRN::MRN> m_mrn;
 };
 
 #endif   // MRNWIDGET_H
