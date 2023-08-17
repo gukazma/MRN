@@ -13,7 +13,6 @@ public:
     virtual void write(const boost::filesystem::path& path_);
     virtual void write(const Tile& tile);
     void simpilify(float percent_);
-    MyVertex getClosest(vcg::Point3f point);
 
     MyMesh& getNativeMesh();
 

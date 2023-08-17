@@ -2,10 +2,10 @@
 #include <MRN/FileSystem/Impl/SoarscapeOSGB/SoarscapeOSGBImpl.h>
 namespace MRN {
 
-FileSystem::FileSystem(const boost::filesystem::path& dir_, Type type)
+FileSystem::FileSystem(const boost::filesystem::path& dir_, VendorID type)
 {
     switch (type) {
-    case MRN::FileSystem::SoarscapeOSGB: m_impl = std::make_shared<SoarscapeOSGBImpl>(dir_); break;
+    case SoarscapeOSGB: m_impl = std::make_shared<SoarscapeOSGBImpl>(dir_); break;
     default: m_impl = std::make_shared<FileSystemBase>(dir_); break;
     }
 }

@@ -3,22 +3,18 @@
 #include <boost/filesystem/path.hpp>
 #include <memory>
 #include <MRN/FileSystem/Tile.h>
+#include <MRN/Types.h>
 namespace MRN
 {
 class MeshImplBase;
 class Mesh
 {
 public:
-    enum DataType
-    {
-        OSGB = 0,
-        GLTF,
-    };
-    explicit Mesh(const boost::filesystem::path& path_, DataType type = OSGB);
+
+    explicit Mesh(const boost::filesystem::path& path_, VendorID type = SoarscapeOSGB);
     void write(const boost::filesystem::path& path_);
-    void     write(const Tile& tile, DataType type = OSGB);
+    void     write(const Tile& tile);
     void       simpilify(float percent_);
-    MyVertex getClosest(vcg::Point3f point);
     ~Mesh();
     Mesh();
     MyMesh& getNativMesh();

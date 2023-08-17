@@ -1,4 +1,4 @@
-#include "MRN/MRN/OSGB/SoarscapeOSGB.h"
+#include "MRN/MRN/OSGB/MRNSoarscapeOSGB.h"
 #include <MRN/FileSystem/FileSystem.h>
 #include <MRN/Mesh/Merge/Merge.h>
 #include <MRN/Mesh/Mesh.h>
@@ -11,7 +11,7 @@
 #include <osgDB/WriteFile>
 namespace fs = boost::filesystem;
 namespace MRN {
-bool SoarscapeOSGB::check()
+bool MRNSoarscapeOSGB::check()
 {
     for (const auto& dir : fs::directory_iterator(m_path)) {
         if (!fs::is_directory(dir)) continue;
@@ -23,28 +23,16 @@ bool SoarscapeOSGB::check()
     }
     return false;
 }
-void SoarscapeOSGB::calculateTileArray()
+void MRNSoarscapeOSGB::calculateTileArray()
 {
     MRN::FileSystem filesystem(m_path);
     filesystem.getTileArray(m_tileArray);
 }
-void SoarscapeOSGB::merge()
+void MRNSoarscapeOSGB::merge()
 {
-    std::vector<MRN::Mesh> meshs;
-    for (const auto& dir : fs::directory_iterator(m_path)) {
-        if (!fs::is_directory(dir)) continue;
-        if (!boost::algorithm::contains(dir.path().filename().string(), "Tile_")) continue;
-        // std::cout << "Path: " << dir << std::endl;
-        for (const auto& file : fs::directory_iterator(dir.path())) {
-            if (boost::algorithm::contains(file.path().filename().string(), "_0.osgb")) {
-                meshs.emplace_back(std::move(MRN::Mesh(file)));
-            }
-        }
-    }
     MyMesh     mergeMesh;
-    MRN::Merge merge;
-    merge.init(meshs);
-    meshs.resize(0);
+    MRN::Merge merge(m_path);
+    merge.init();
     merge.process();
     merge.getMerged(mergeMesh);
     for (size_t level = 0; level < m_tileArray.size(); level++) {
@@ -73,8 +61,7 @@ void SoarscapeOSGB::merge()
         }
     }
 }
-void SoarscapeOSGB::cutCake() {}
-void SoarscapeOSGB::writeTile() {
+void MRNSoarscapeOSGB::writeTile() {
     for (size_t level = 0; level < m_tileArray.size(); level++) {
         std::cout << "writeTile ====================== " << level << std::endl;
         const auto&            tileArray = m_tileArray[level];

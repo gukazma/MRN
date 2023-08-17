@@ -12,17 +12,8 @@ TEST(MRN, MERGE)
     boost::filesystem::path MRNDataPath = env["MRNDATA"].to_string();
     boost::filesystem::path inputDir = MRNDataPath / "osgb/MRN";
     std::vector<MRN::Mesh>  meshs;
-    for (const auto& dir : fs::directory_iterator(inputDir)) {
-        if (!fs::is_directory(dir)) continue;
-        if (!boost::algorithm::contains(dir.path().filename().string(), "Tile_+")) continue;
-        //std::cout << "Path: " << dir << std::endl;
-        boost::filesystem::path meshpath = dir.path() / dir.path().filename();
-        meshpath  += boost::filesystem::path("_15_0.osgb");
-        std::cout << "Path: " << meshpath << std::endl;
-        meshs.emplace_back(std::move(MRN::Mesh(meshpath)));
-    }
-    MRN::Merge merge;
-    merge.init(meshs);
+    MRN::Merge merge(inputDir);
+    merge.init();
     merge.process();
     MyMesh outputmesh;
     merge.getMerged(outputmesh);
