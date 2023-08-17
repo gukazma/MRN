@@ -102,14 +102,13 @@ void usage()
 
 
 
-int meshReconstruction(int argc, const char* argv[])
+int meshReconstruction(int argc, const char* argv[], const char* output)
 {
 
     Histogram<float>                                         h;
     tri::PlyMC<SMesh, SimpleMeshProvider<SMesh>>             pmc;
     tri::PlyMC<SMesh, SimpleMeshProvider<SMesh>>::Parameter& p = pmc.p;
-
-
+    p.basename                                                 = output;
     // This line is required to be sure that the decimal separatore is ALWAYS the . and not the ,
     // see the comment at the beginning of the file
     setlocale(LC_ALL, "En_US");

@@ -36,11 +36,16 @@ void Merge::init()
 }
 void Merge::process()
 {
-    std::string                output = "-o" + m_plymcout.generic_path().string();
-    std::array<const char*, 4> args   = {
-        " ", "-V4", m_mergePath.generic_string().c_str(), output.c_str()};
-
-    meshReconstruction(4, args.data());
+    std::string                output = m_plymcout.generic_path().string();
+    std::array<const char*, 3> args   = {
+        " ",
+        "-V8",
+        m_mergePath.generic_string().c_str()
+    };
+    MyMesh                     plycut;
+    std::string plycutpath = (m_path.parent_path() / "merge/plymcout").generic_path().string();
+    vcg::tri::io::ExporterPLY<MyMesh>::Save(plycut, output.c_str());
+    meshReconstruction(3, args.data(), plycutpath.c_str());
     MyMesh mergemesh;
     vcg::tri::io::ImporterPLY<MyMesh>::Open(mergemesh, m_mergePath.generic_path().string().c_str());
     std::cout << "===================================================" << std::endl;

@@ -47,16 +47,13 @@ void MRNSoarscapeOSGB::merge()
             for (size_t y = 0; y < tileVector.size(); y++) {
                 if (!tileVector[y].has_value()) continue;
                 const auto& tile = tileVector[y].value();
-                MyMesh      tileMesh;
-                vcg::tri::Append<MyMesh, MyMesh>::MeshCopyConst(tileMesh, mergeMesh);
-                MRN::cut(tileMesh, tile.box);
+                MRN::cut(mergeMesh, tile.box);
                 boost::filesystem::path savePath =
                     tile.tilePath.parent_path() / tile.tilePath.stem();
                 savePath += ".ply";
-                std::cout << "tile path: " << tile.tilePath << std::endl;
-                std::cout << "savePath: " << savePath << std::endl;
-                vcg::tri::io::ExporterPLY<MyMesh>::Save(
-                    tileMesh, savePath.generic_string().c_str(), vcg::tri::io::Mask::IOM_VERTCOLOR);
+                vcg::tri::io::ExporterPLY<MyMesh>::Save(mergeMesh,
+                                                        savePath.generic_string().c_str(),
+                                                        vcg::tri::io::Mask::IOM_VERTCOLOR);
             }
         }
     }
@@ -75,8 +72,6 @@ void MRNSoarscapeOSGB::writeTile() {
                 Mesh        mesh(meshPath);
                 mesh.write(tileVector[y].get());
                 boost::filesystem::remove(meshPath);
-                std::cout << "add tile path: " << tilePath << std::endl;
-                std::cout << "remove mesh Path: " << meshPath << std::endl;
             }
         }
     }

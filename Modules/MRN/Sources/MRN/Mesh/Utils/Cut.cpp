@@ -7,9 +7,16 @@ void cut(MyMesh& mesh, const vcg::Box3f& bbox)
         auto& v0   = face.V(0);
         auto& v1   = face.V(1);
         auto& v2   = face.V(2);
-        if (bbox.IsIn(v0->P()) || bbox.IsIn(v1->P()) || bbox.IsIn(v2->P())) continue;
-
-        vcg::tri::Allocator<MyMesh>::DeleteFace(mesh, face);
+        if (bbox.IsIn(v0->P()) || bbox.IsIn(v1->P()) || bbox.IsIn(v2->P()))
+        {
+            v0->ClearD();
+            v1->ClearD();
+            v2->ClearD();
+            face.ClearD();
+        }
+        else {
+            vcg::tri::Allocator<MyMesh>::DeleteFace(mesh, face);
+        }
     }
     vcg::tri::Clean<MyMesh>::RemoveUnreferencedVertex(mesh);
 }

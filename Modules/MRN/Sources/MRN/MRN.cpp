@@ -7,9 +7,10 @@ namespace MRN {
         case SoarscapeOSGB: 
             m_impl = std::make_shared<MRNSoarscapeOSGB>(path_);
             break;
-        default: break;
+        default: 
+            m_impl = std::make_shared<MRNBaseImpl>();
+            break;
         }
-        m_impl = std::make_shared<MRNBaseImpl>();
     }
     bool MRN::check()
     {
