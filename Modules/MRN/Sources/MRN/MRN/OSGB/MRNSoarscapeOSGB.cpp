@@ -47,11 +47,13 @@ void MRNSoarscapeOSGB::merge()
             for (size_t y = 0; y < tileVector.size(); y++) {
                 if (!tileVector[y].has_value()) continue;
                 const auto& tile = tileVector[y].value();
-                MRN::cut(mergeMesh, tile.box);
+                MyMesh      cutmesh;
+                MRN::cut(cutmesh,mergeMesh , tile.box);
                 boost::filesystem::path savePath =
                     tile.tilePath.parent_path() / tile.tilePath.stem();
                 savePath += ".ply";
-                vcg::tri::io::ExporterPLY<MyMesh>::Save(mergeMesh,
+                vcg::tri::io::ExporterPLY<MyMesh>::Save(
+                    cutmesh,
                                                         savePath.generic_string().c_str(),
                                                         vcg::tri::io::Mask::IOM_VERTCOLOR);
             }

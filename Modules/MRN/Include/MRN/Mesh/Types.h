@@ -51,3 +51,14 @@ public:
         : TECQ(p, i, pp)
     {}
 };
+
+namespace std {
+template<> struct hash<vcg::Point3f>
+{
+    size_t operator()(vcg::Point3f const& vertex) const
+    {
+        return ((hash<float>()(vertex[0]) ^ (hash<float>()(vertex[2]) << 1)) >> 1) ^
+               (hash<float>()(vertex[1]) << 1);
+    }
+};
+}   // namespace std

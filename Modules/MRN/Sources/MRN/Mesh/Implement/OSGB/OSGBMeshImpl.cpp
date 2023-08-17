@@ -16,16 +16,7 @@
 #include <vcg/complex/algorithms/clean.h>
 #include <vector>
 
-namespace std {
-template<> struct hash<vcg::Point3f>
-{
-    size_t operator()(vcg::Point3f const& vertex) const
-    {
-        return ((hash<float>()(vertex[0]) ^ (hash<float>()(vertex[2]) << 1)) >> 1) ^
-               (hash<float>()(vertex[1]) << 1);
-    }
-};
-}   // namespace std
+
 namespace MRN {
 class OSGBMeshVisitor : public osg::NodeVisitor
 {
@@ -125,14 +116,6 @@ void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_)
     node->accept(meshVisitor);
 }
 
-
-size_t findIndex(MyVertex& v_, osg::ref_ptr<osg::Vec3Array> vertices)
-{
-    for (size_t i = 0; i < vertices->size(); i++) {
-        osg::Vec3 v(v_.P()[0], v_.P()[1], v_.P()[2]);
-        if (v == vertices->at(i)) return i;
-    }
-}
 void OSGBMeshImpleMesh::write(const boost::filesystem::path& path_)
 {
     vcg::tri::Clean<MyMesh>::RemoveDuplicateVertex(m_nativeMesh);
