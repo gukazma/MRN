@@ -188,6 +188,50 @@
         <source>Open folder</source>
         <translation type="unfinished">打开结果</translation>
     </message>
+    <message>
+        <source>Error</source>
+        <translation type="unfinished">错误</translation>
+    </message>
+    <message>
+        <source>Please select data folder!</source>
+        <translation type="unfinished">请选择数据目录！</translation>
+    </message>
+    <message>
+        <source>Inform</source>
+        <translation type="unfinished">消息</translation>
+    </message>
+    <message>
+        <source>Data Format is right!</source>
+        <translation type="unfinished">数据格式正确！</translation>
+    </message>
+    <message>
+        <source>Data Format is wrong!</source>
+        <translation type="unfinished">数据格式错误！</translation>
+    </message>
+    <message>
+        <source>Calculating tile array.</source>
+        <translation type="unfinished">正在计算瓦块金字塔。</translation>
+    </message>
+    <message>
+        <source>Tile array calculated.</source>
+        <translation type="unfinished">瓦块金字塔计算完成。</translation>
+    </message>
+    <message>
+        <source>Begin merge.</source>
+        <translation type="unfinished">开始合并网格。</translation>
+    </message>
+    <message>
+        <source>Tile merged.</source>
+        <translation type="unfinished">网格合并完成。</translation>
+    </message>
+    <message>
+        <source>Begin saving tile array.</source>
+        <translation type="unfinished">开始保存瓦块金字塔。</translation>
+    </message>
+    <message>
+        <source>Tile array saved.</source>
+        <translation type="unfinished">瓦块金字塔保存完成。</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
