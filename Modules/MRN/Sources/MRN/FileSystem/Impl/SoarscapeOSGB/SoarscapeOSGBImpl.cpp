@@ -17,7 +17,6 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
         return;
     }
 
-    // ��ȡ����tile�ļ���
     std::vector<boost::filesystem::directory_entry> tileDir;
     for (const auto& dir : fs::directory_iterator(m_dir)) {
         if (!fs::is_directory(dir)) continue;
@@ -26,7 +25,6 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
         // std::cout << "Path: " << dir << std::endl;
     }
 
-    // ��ȡԭʼ��С�㼶
     int minLevel = 0;
     if (!tileDir.empty()) {
         for (const auto& file : fs::directory_iterator(*tileDir.begin())) {
@@ -45,7 +43,6 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
         return;
     }
 
-    // ������е���С�㼶osgb
     std::unique_ptr<tileCoord> maxTile(
         new tileCoord(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()));
     std::unique_ptr<tileCoord> minTile(
@@ -193,7 +190,6 @@ void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
     }
 }
 
-// �߿�����ת��Ϊ�ַ��� eg��1 -> 001
 std::string SoarscapeOSGBImpl::tile_intToString(int tileNumber, int n)
 {
     bool addNegative = false;

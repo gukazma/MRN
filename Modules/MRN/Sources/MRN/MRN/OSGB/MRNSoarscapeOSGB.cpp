@@ -66,22 +66,25 @@ void MRNSoarscapeOSGB::merge()
     }
 }
 void MRNSoarscapeOSGB::writeTile() {
-    for (size_t level = 0; level < m_tileArray.size(); level++) {
-        std::cout << "writeTile ====================== " << level << std::endl;
-        const auto&            tileArray = m_tileArray[level];
-        for (size_t x = 0; x < tileArray.size(); x++) {
-            const auto& tileVector = tileArray[x];
-            for (size_t y = 0; y < tileVector.size(); y++) {
-                if (!tileVector[y].has_value()) continue;
-                std::string tilePath = tileVector[y]->tilePath.generic_string();
-                boost::filesystem::path meshPath =
-                    tilePath.substr(0, tilePath.find(".osgb")) + ".ply";
-                Mesh        mesh(meshPath);
-                mesh.write(tileVector[y].get());
-                boost::filesystem::remove(meshPath);
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, m_tileArray.size()),
+                          [&](const tbb::blocked_range<size_t>& r) {
+        for (size_t level = r.begin(); level != r.end(); level++) {
+            std::cout << "writeTile ====================== " << level << std::endl;
+            const auto& tileArray = m_tileArray[level];
+            for (size_t x = 0; x < tileArray.size(); x++) {
+                const auto& tileVector = tileArray[x];
+                for (size_t y = 0; y < tileVector.size(); y++) {
+                    if (!tileVector[y].has_value()) continue;
+                    std::string             tilePath = tileVector[y]->tilePath.generic_string();
+                    boost::filesystem::path meshPath =
+                        tilePath.substr(0, tilePath.find(".osgb")) + ".ply";
+                    Mesh mesh(meshPath);
+                    mesh.write(tileVector[y].get());
+                    boost::filesystem::remove(meshPath);
+                }
             }
         }
-    }
+    });
     
     // 生成根节点
     osg::ref_ptr<osg::PagedLOD> rootNode = new osg::PagedLOD;
