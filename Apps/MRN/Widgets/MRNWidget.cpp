@@ -49,7 +49,8 @@ void MRNWidget::slot_scan(bool)
 
 void MRNWidget::slot_openFolder(bool) {
     if (ui->lineEdit_dataFolder->text().isEmpty()) return;
-    QUrl _url = QUrl::fromLocalFile(ui->lineEdit_dataFolder->text());
+    boost::filesystem::path folder = ui->lineEdit_dataFolder->text().toLocal8Bit().constData();
+    QUrl                    _url   = QUrl::fromLocalFile(folder.parent_path().generic_path().string().c_str());
     QDesktopServices::openUrl(_url);
 }
 
