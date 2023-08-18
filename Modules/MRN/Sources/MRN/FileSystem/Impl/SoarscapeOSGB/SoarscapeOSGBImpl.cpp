@@ -9,7 +9,13 @@ namespace fs = boost::filesystem;
 namespace MRN {
 SoarscapeOSGBImpl::SoarscapeOSGBImpl(const boost::filesystem::path& path_)
     : FileSystemBase(path_)
-{}
+{
+    fs::path metadatapath = path_ / "metadata.xml";
+    fs::path metaToPath   = path_.parent_path() / "metadata.xml";
+    if (!fs::exists(metaToPath)) {
+        boost::filesystem::copy(metadatapath, metaToPath);
+    }
+}
 void SoarscapeOSGBImpl::getTileArray(TileArray& tileArray)
 {
     if (!fs::exists(m_dir) || !fs::is_directory(m_dir)) {
