@@ -45,6 +45,11 @@ target_include_directories(
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
 )
 
+set_target_properties(${TARGET_NAME} PROPERTIES
+    WIN32_EXECUTABLE ON
+    MACOSX_BUNDLE ON
+)
+
 find_program(LUPDATE_EXE lupdate)
 add_custom_target(
       MRNTranslateUpdate

@@ -166,7 +166,7 @@
     <name>MRNWidget</name>
     <message>
         <source>Merge root node</source>
-        <translation type="unfinished">合并根节点</translation>
+        <translation type="obsolete">合并根节点</translation>
     </message>
     <message>
         <source>...</source>
@@ -235,6 +235,14 @@
     <message>
         <source>Merge success!</source>
         <translation type="unfinished">合并根节点成功！</translation>
+    </message>
+    <message>
+        <source>Smart3d merge root node tool</source>
+        <translation type="obsolete">Smart3D合并根节点工具</translation>
+    </message>
+    <message>
+        <source>Smart3D merge root node tool</source>
+        <translation type="unfinished">Smart3D合并根节点工具</translation>
     </message>
 </context>
 <context>
