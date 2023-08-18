@@ -48,7 +48,10 @@ void MRNWidget::slot_scan(bool)
 }
 
 void MRNWidget::slot_openFolder(bool) {
-    if (ui->lineEdit_dataFolder->text().isEmpty()) return;
+    if (ui->lineEdit_dataFolder->text().isEmpty()) {
+        QMessageBox::critical(nullptr, tr("Error"), tr("Please select data folder!"));
+        return;
+    }
     boost::filesystem::path folder = ui->lineEdit_dataFolder->text().toLocal8Bit().constData();
     QUrl                    _url   = QUrl::fromLocalFile(folder.parent_path().generic_path().string().c_str());
     QDesktopServices::openUrl(_url);
@@ -74,6 +77,7 @@ void MRNWidget::slot_begin(bool) {
         QMessageBox::critical(nullptr, tr("Error"), tr("Data Format is wrong!"));
         return;
     }
+    ui->pushButton_begin->setEnabled(false);
     std::thread thread([&]() {
         QString message;
         emit this->signal_setProgress(0, tr("Calculating tile array."));
@@ -93,6 +97,12 @@ void MRNWidget::slot_setProgress(int value_, QString message_)
 {
     ui->progressBar->setValue(value_);
     ui->plainTextEdit->appendPlainText(message_);
+    ui->pushButton_begin->setEnabled(false);
+    if (value_ == 100)
+    {
+        ui->pushButton_begin->setEnabled(true);
+        QMessageBox::information(nullptr, tr("Inform"), tr("Merge success!"));
+    }
 }
 
 MRNWidget::~MRNWidget()

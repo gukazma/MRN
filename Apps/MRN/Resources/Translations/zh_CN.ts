@@ -186,7 +186,7 @@
     </message>
     <message>
         <source>Open folder</source>
-        <translation type="unfinished">打开结果</translation>
+        <translation type="unfinished">打开结果目录</translation>
     </message>
     <message>
         <source>Error</source>
@@ -231,6 +231,10 @@
     <message>
         <source>Tile array saved.</source>
         <translation type="unfinished">瓦块金字塔保存完成。</translation>
+    </message>
+    <message>
+        <source>Merge success!</source>
+        <translation type="unfinished">合并根节点成功！</translation>
     </message>
 </context>
 <context>
