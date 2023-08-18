@@ -111,7 +111,7 @@ void OSGBMeshImpleMesh::read(const boost::filesystem::path& path_)
         MeshImplBase::read(path_);
         return;
     }
-    auto            node = osgDB::readNodeFile(path_.generic_string().c_str());
+    osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(path_.generic_string().c_str());
     OSGBMeshVisitor meshVisitor(m_nativeMesh);
     node->accept(meshVisitor);
 }
@@ -210,7 +210,18 @@ void OSGBMeshImpleMesh::write(const Tile& tile)
             pagedLod->setRadius(sphere.radius());
             pagedLod->addChild(geode.get(), 0, tile.threshold, "");
             pagedLod->setDatabasePath("");
-            std::string flag = tile.firstTile ? "../../MRN/" : "../";
+            std::string flag;
+            if (tile.firstTile) {
+                flag =
+                    "../../" +
+                    tile.parentPaths[i].tilePath.parent_path().parent_path().filename().string() +
+                    "/";
+                std::cout << flag << std::endl;
+            }
+            else {
+                flag = "../";
+            }
+            
             std::string parentFileName =
                 flag + tile.parentPaths[i].tilePath.parent_path().filename().generic_string() +
                 "/" + tile.parentPaths[i].tilePath.filename().generic_string();
