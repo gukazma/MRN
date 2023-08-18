@@ -42,10 +42,15 @@ void Merge::process()
     std::string plycutpath = (m_path.parent_path() / "merge/plymcout").generic_path().string();
     vcg::tri::io::ExporterPLY<MyMesh>::Save(plycut, output.c_str());
     meshReconstruction(8, m_mergePath.generic_string().c_str(), plycutpath.c_str());
+    boost::filesystem::remove(m_mergePath.generic_path().string().c_str());
 }
 void Merge::getMerged(MyMesh& mesh)
 {
     vcg::tri::io::ImporterPLY<MyMesh>::Open(mesh, m_plymcout.generic_path().string().c_str());
+    vcg::tri::UpdateTopology<MyMesh>::FaceFace(mesh);
+    vcg::tri::UpdateTopology<MyMesh>::VertexFace(mesh);
+    vcg::tri::Clean<MyMesh>::RemoveSmallConnectedComponentsSize(mesh, 300);
     boost::filesystem::remove(m_plymcout.generic_path().string().c_str());
+    boost::filesystem::remove_all(m_path.parent_path() / "merge");
 }
 }   // namespace MRN
