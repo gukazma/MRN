@@ -20,7 +20,7 @@ void MeshImplBase::write(const boost::filesystem::path& path_)
     vcg::tri::io::Exporter<MyMesh>::Save(m_nativeMesh, path_.generic_string().c_str());
 }
 void MeshImplBase::write(const Tile& tile) {
-    return;
+    vcg::tri::io::Exporter<MyMesh>::Save(m_nativeMesh, path_.generic_string().c_str());
 }
 void MeshImplBase::simpilify(float percent_)
 {
